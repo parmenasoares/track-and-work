@@ -19,6 +19,7 @@ export const translations = {
     signUpHere: 'Cadastre-se aqui',
     
     // Dashboard
+    appTitle: 'Controle de Frota',
     welcomeBack: 'Bem-vindo',
     dashboard: 'Painel',
     activityRecord: 'Registro de Atividade',
@@ -93,6 +94,7 @@ export const translations = {
     signUpHere: 'Sign up here',
     
     // Dashboard
+    appTitle: 'Fleet Control',
     welcomeBack: 'Welcome back',
     dashboard: 'Dashboard',
     activityRecord: 'Activity Record',
