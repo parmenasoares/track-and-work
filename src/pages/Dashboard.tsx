@@ -30,6 +30,7 @@ const Dashboard = () => {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -50,12 +51,14 @@ const Dashboard = () => {
       if (user) {
         setUserEmail(user.email || '');
 
-        const [{ data: profile }, { data: adminFlag }] = await Promise.all([
+        const [{ data: profile }, { data: adminFlag }, { data: superAdminFlag }] = await Promise.all([
           supabase.from('users').select('first_name, last_name').eq('id', user.id).maybeSingle(),
           supabase.rpc('is_admin_or_super_admin', { _user_id: user.id }),
+          supabase.rpc('is_user_role', { _user_id: user.id, _role: 'SUPER_ADMIN' }),
         ]);
 
         setIsAdmin(!!adminFlag);
+        setIsSuperAdmin(!!superAdminFlag);
 
         if (profile) {
           setUserName(`${profile.first_name || ''} ${profile.last_name || ''}`.trim() || user.email || '');
@@ -148,10 +151,19 @@ const Dashboard = () => {
             )}
           </div>
 
-          <Button variant="ghost" onClick={handleLogout} className="shrink-0">
-            <LogOut className="h-5 w-5" />
-            <span className="ml-2">{t('logout')}</span>
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            {isSuperAdmin && (
+              <Button variant="outline" onClick={() => navigate('/admin/users')}>
+                <ShieldCheck className="h-5 w-5" />
+                <span className="ml-2">{t('userManagement')}</span>
+              </Button>
+            )}
+
+            <Button variant="ghost" onClick={handleLogout}>
+              <LogOut className="h-5 w-5" />
+              <span className="ml-2">{t('logout')}</span>
+            </Button>
+          </div>
         </div>
       </header>
 
