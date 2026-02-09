@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, CheckCircle2, RefreshCcw, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, RefreshCcw, ShieldCheck, XCircle } from "lucide-react";
 
 type ActivityRow = {
   id: string;
@@ -42,6 +42,44 @@ const AdminActivitiesValidation = () => {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { toast } = useToast();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const check = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        if (!cancelled) setIsSuperAdmin(false);
+        return;
+      }
+
+      const { data, error } = await supabase.rpc("is_user_role", {
+        _user_id: session.user.id,
+        _role: "SUPER_ADMIN",
+      });
+
+      if (cancelled) return;
+      setIsSuperAdmin(!error && !!data);
+    };
+
+    check();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      check();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
+
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["admin", "pending-activities"],
@@ -123,10 +161,21 @@ const AdminActivitiesValidation = () => {
             </div>
           </div>
 
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCcw className="mr-2 h-4 w-4" />
-            {t("refresh")}
-          </Button>
+          <div className="flex items-center gap-2">
+            {isSuperAdmin && (
+              <Button variant="outline" onClick={() => navigate("/admin/users")}
+                aria-label={t("userManagement")}
+              >
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                {t("userManagement")}
+              </Button>
+            )}
+
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              {t("refresh")}
+            </Button>
+          </div>
         </div>
       </header>
 
