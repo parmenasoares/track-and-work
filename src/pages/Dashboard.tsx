@@ -41,7 +41,7 @@ const Dashboard = () => {
       if (error) {
         toast({
           title: t('error'),
-          description: error.message,
+          description: `${t('sessionLoadFailed')}: ${error.message}`,
           variant: 'destructive',
         });
         return;
@@ -73,7 +73,7 @@ const Dashboard = () => {
     if (error) {
       toast({
         title: t('error'),
-        description: error.message,
+        description: `${t('logoutFailed')}: ${error.message}`,
         variant: 'destructive',
       });
       return;
@@ -150,7 +150,7 @@ const Dashboard = () => {
 
           <Button variant="ghost" onClick={handleLogout} className="shrink-0">
             <LogOut className="h-5 w-5" />
-            <span className="ml-2">Logout</span>
+            <span className="ml-2">{t('logout')}</span>
           </Button>
         </div>
       </header>

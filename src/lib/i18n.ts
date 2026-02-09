@@ -68,6 +68,10 @@ export const translations = {
     error: 'Erro',
     success: 'Sucesso',
     cancel: 'Cancelar',
+
+    // Session
+    sessionLoadFailed: 'Não foi possível carregar sua sessão',
+    logoutFailed: 'Não foi possível sair da conta',
   },
   en: {
     // Landing/Language selection
@@ -138,6 +142,10 @@ export const translations = {
     error: 'Error',
     success: 'Success',
     cancel: 'Cancel',
+
+    // Session
+    sessionLoadFailed: 'Unable to load your session',
+    logoutFailed: 'Unable to sign out',
   },
 } as const;
 
