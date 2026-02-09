@@ -139,7 +139,7 @@ const Dashboard = () => {
       <header className="border-b bg-card sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold">Fleet Control</h1>
+            <h1 className="text-2xl font-bold">{t('appTitle')}</h1>
             <p className="text-sm text-muted-foreground truncate">
               {t('welcomeBack')}{userName ? `, ${userName}` : ''}
             </p>
