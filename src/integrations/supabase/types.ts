@@ -181,6 +181,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_remove_user_role_by_email: {
+        Args: { _email: string }
+        Returns: undefined
+      }
+      admin_set_user_role_by_email: {
+        Args: { _email: string; _role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
       is_activity_owner: {
         Args: { _activity_id: string; _user_id: string }
         Returns: boolean
