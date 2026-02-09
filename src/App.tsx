@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
+import SuperAdminRoute from "@/components/SuperAdminRoute";
 import LanguageSelect from "./pages/LanguageSelect";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -16,6 +17,7 @@ import Fuel from "./pages/Fuel";
 import Orders from "./pages/Orders";
 import Support from "./pages/Support";
 import AdminActivitiesValidation from "./pages/AdminActivitiesValidation";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,6 +94,14 @@ const App = () => (
                 <AdminRoute>
                   <AdminActivitiesValidation />
                 </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <SuperAdminRoute>
+                  <AdminUsers />
+                </SuperAdminRoute>
               }
             />
             <Route path="*" element={<NotFound />} />
