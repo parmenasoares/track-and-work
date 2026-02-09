@@ -25,41 +25,67 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
+    const email = formData.email.trim();
+    const password = formData.password;
+
     setLoading(true);
 
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
+          email,
+          password,
         });
         if (error) throw error;
-        navigate('/dashboard');
-      } else {
-        if (formData.password !== formData.confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
-        const { error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              first_name: formData.firstName,
-              last_name: formData.lastName,
-            },
-          },
-        });
-        if (error) throw error;
+
         toast({
           title: t('success'),
-          description: 'Account created! Please check your email to verify.',
+          description: t('login') + ' ' + t('success').toLowerCase(),
         });
-        setIsLogin(true);
+
+        navigate('/dashboard');
+        return;
       }
-    } catch (error: any) {
+
+      if (password !== formData.confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+          },
+        },
+      });
+      if (error) throw error;
+
+      toast({
+        title: t('success'),
+        description: 'Account created! Please check your email to verify.',
+      });
+
+      setFormData((prev) => ({
+        ...prev,
+        password: '',
+        confirmPassword: '',
+      }));
+      setIsLogin(true);
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'object' && err && 'message' in err
+          ? String((err as any).message)
+          : 'Unexpected error';
+
       toast({
         title: t('error'),
-        description: error.message,
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -145,6 +171,7 @@ const Login = () => {
             <p>
               {t('dontHaveAccount')}{' '}
               <button
+                type="button"
                 onClick={() => setIsLogin(false)}
                 className="text-primary hover:underline font-semibold"
               >
@@ -155,6 +182,7 @@ const Login = () => {
             <p>
               {t('alreadyHaveAccount')}{' '}
               <button
+                type="button"
                 onClick={() => setIsLogin(true)}
                 className="text-primary hover:underline font-semibold"
               >
