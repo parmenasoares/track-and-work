@@ -1,0 +1,222 @@
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowLeft, CheckCircle2, RefreshCcw, XCircle } from "lucide-react";
+
+type ActivityRow = {
+  id: string;
+  machine_id: string;
+  operator_id: string;
+  start_time: string;
+  end_time: string | null;
+  status: string;
+  start_odometer: number;
+  end_odometer: number | null;
+  notes: string | null;
+};
+
+type MachineRow = { id: string; name: string; model: string | null };
+
+type UserRow = {
+  id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+};
+
+const statusVariant = (status: string): "secondary" | "destructive" | "default" => {
+  if (status === "PENDING_VALIDATION") return "secondary";
+  if (status === "REJECTED") return "destructive";
+  return "default";
+};
+
+const AdminActivitiesValidation = () => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ["admin", "pending-activities"],
+    queryFn: async () => {
+      const { data: activities, error: activitiesError } = await supabase
+        .from("activities")
+        .select("id, machine_id, operator_id, start_time, end_time, status, start_odometer, end_odometer, notes")
+        .eq("status", "PENDING_VALIDATION")
+        .order("created_at", { ascending: false });
+
+      if (activitiesError) throw activitiesError;
+
+      const machineIds = Array.from(new Set((activities ?? []).map((a) => a.machine_id)));
+      const operatorIds = Array.from(new Set((activities ?? []).map((a) => a.operator_id)));
+
+      const [{ data: machines, error: machinesError }, { data: users, error: usersError }] = await Promise.all([
+        machineIds.length
+          ? supabase.from("machines").select("id, name, model").in("id", machineIds)
+          : Promise.resolve({ data: [] as MachineRow[], error: null }),
+        operatorIds.length
+          ? supabase.from("users").select("id, email, first_name, last_name").in("id", operatorIds)
+          : Promise.resolve({ data: [] as UserRow[], error: null }),
+      ]);
+
+      if (machinesError) throw machinesError;
+      if (usersError) throw usersError;
+
+      return {
+        activities: (activities ?? []) as ActivityRow[],
+        machines: (machines ?? []) as MachineRow[],
+        users: (users ?? []) as UserRow[],
+      };
+    },
+  });
+
+  const machineById = useMemo(() => {
+    const map = new Map<string, MachineRow>();
+    (data?.machines ?? []).forEach((m) => map.set(m.id, m));
+    return map;
+  }, [data?.machines]);
+
+  const userById = useMemo(() => {
+    const map = new Map<string, UserRow>();
+    (data?.users ?? []).forEach((u) => map.set(u.id, u));
+    return map;
+  }, [data?.users]);
+
+  const updateStatus = async (activityId: string, status: "APPROVED" | "REJECTED") => {
+    try {
+      const { error } = await supabase.from("activities").update({ status }).eq("id", activityId);
+      if (error) throw error;
+
+      toast({
+        title: t("success"),
+        description: status === "APPROVED" ? t("activityApproved") : t("activityRejected"),
+      });
+
+      await qc.invalidateQueries({ queryKey: ["admin", "pending-activities"] });
+    } catch (err: any) {
+      toast({
+        title: t("error"),
+        description: err?.message ?? "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-4 justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}> 
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">{t("adminValidation")}</h1>
+              <p className="text-sm text-muted-foreground">{t("pendingActivities")}</p>
+            </div>
+          </div>
+
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCcw className="mr-2 h-4 w-4" />
+            {t("refresh")}
+          </Button>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 max-w-5xl">
+        <Card className="p-0 overflow-hidden">
+          <div className="p-6 border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">{t("activities")}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {isLoading ? t("loading") : `${data?.activities.length ?? 0} ${t("pending")}`}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("status")}</TableHead>
+                <TableHead>{t("machine")}</TableHead>
+                <TableHead>{t("operator")}</TableHead>
+                <TableHead>{t("startTime")}</TableHead>
+                <TableHead>{t("endTime")}</TableHead>
+                <TableHead className="text-right">{t("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(data?.activities ?? []).map((a) => {
+                const machine = machineById.get(a.machine_id);
+                const user = userById.get(a.operator_id);
+                const operatorLabel = user
+                  ? `${(user.first_name ?? "").trim()} ${(user.last_name ?? "").trim()}`.trim() || user.email
+                  : a.operator_id;
+
+                return (
+                  <TableRow key={a.id}>
+                    <TableCell>
+                      <Badge variant={statusVariant(a.status)}>{t("pendingValidation")}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {machine ? (
+                        <div className="leading-tight">
+                          <div className="font-medium">{machine.name}</div>
+                          {machine.model && <div className="text-xs text-muted-foreground">{machine.model}</div>}
+                        </div>
+                      ) : (
+                        a.machine_id
+                      )}
+                    </TableCell>
+                    <TableCell>{operatorLabel}</TableCell>
+                    <TableCell>{new Date(a.start_time).toLocaleString()}</TableCell>
+                    <TableCell>{a.end_time ? new Date(a.end_time).toLocaleString() : "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateStatus(a.id, "APPROVED")}
+                        >
+                          <CheckCircle2 className="mr-2 h-4 w-4" />
+                          {t("approve")}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => updateStatus(a.id, "REJECTED")}
+                        >
+                          <XCircle className="mr-2 h-4 w-4" />
+                          {t("reject")}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+
+              {!isLoading && (data?.activities?.length ?? 0) === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                    {t("noPendingActivities")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+export default AdminActivitiesValidation;

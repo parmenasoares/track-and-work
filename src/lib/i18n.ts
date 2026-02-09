@@ -27,7 +27,8 @@ export const translations = {
     fuel: 'Combustível',
     orders: 'Pedidos',
     support: 'Suporte TI',
-    
+    adminValidation: 'Validação (Admin)',
+
     // Activity registration
     startActivity: 'Iniciar Atividade',
     endActivity: 'Finalizar Atividade',
@@ -38,12 +39,29 @@ export const translations = {
     notes: 'Observações',
     register: 'Registrar',
     finish: 'Finalizar',
-    
+
+    // Admin validation
+    pendingActivities: 'Atividades pendentes de validação',
+    activities: 'Atividades',
+    pending: 'pendentes',
+    status: 'Status',
+    machine: 'Máquina',
+    operator: 'Operador',
+    startTime: 'Início',
+    endTime: 'Fim',
+    actions: 'Ações',
+    approve: 'Aprovar',
+    reject: 'Rejeitar',
+    refresh: 'Atualizar',
+    activityApproved: 'Atividade aprovada.',
+    activityRejected: 'Atividade rejeitada.',
+    noPendingActivities: 'Sem atividades pendentes no momento.',
+
     // Status
     pendingValidation: 'Aguardando validação',
     validated: 'Validado',
     rejected: 'Rejeitado',
-    
+
     // Common
     logout: 'Sair',
     loading: 'Carregando...',
@@ -79,7 +97,8 @@ export const translations = {
     fuel: 'Fuel',
     orders: 'Orders',
     support: 'IT Support',
-    
+    adminValidation: 'Validation (Admin)',
+
     // Activity registration
     startActivity: 'Start Activity',
     endActivity: 'End Activity',
@@ -90,12 +109,29 @@ export const translations = {
     notes: 'Notes',
     register: 'Register',
     finish: 'Finish',
-    
+
+    // Admin validation
+    pendingActivities: 'Pending activities for validation',
+    activities: 'Activities',
+    pending: 'pending',
+    status: 'Status',
+    machine: 'Machine',
+    operator: 'Operator',
+    startTime: 'Start',
+    endTime: 'End',
+    actions: 'Actions',
+    approve: 'Approve',
+    reject: 'Reject',
+    refresh: 'Refresh',
+    activityApproved: 'Activity approved.',
+    activityRejected: 'Activity rejected.',
+    noPendingActivities: 'No pending activities right now.',
+
     // Status
     pendingValidation: 'Pending validation',
     validated: 'Validated',
     rejected: 'Rejected',
-    
+
     // Common
     logout: 'Logout',
     loading: 'Loading...',
