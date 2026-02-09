@@ -4,6 +4,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import {
   ClipboardList,
   Wrench,
@@ -25,13 +26,30 @@ type DashboardBtn = {
 const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error) {
+        toast({
+          title: t('error'),
+          description: error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (user) {
+        setUserEmail(user.email || '');
+
         const [{ data: profile }, { data: adminFlag }] = await Promise.all([
           supabase.from('users').select('first_name, last_name').eq('id', user.id).maybeSingle(),
           supabase.rpc('is_admin_or_super_admin', { _user_id: user.id }),
@@ -47,10 +65,20 @@ const Dashboard = () => {
       }
     };
     loadUser();
-  }, []);
+  }, [t, toast]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      toast({
+        title: t('error'),
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     navigate('/login');
   };
 
@@ -109,15 +137,20 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-4">
+          <div className="min-w-0">
             <h1 className="text-2xl font-bold">Fleet Control</h1>
-            <p className="text-sm text-muted-foreground">
-              {t('welcomeBack')}, {userName}
+            <p className="text-sm text-muted-foreground truncate">
+              {t('welcomeBack')}{userName ? `, ${userName}` : ''}
             </p>
+            {!!userEmail && (
+              <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
+            )}
           </div>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
+
+          <Button variant="ghost" onClick={handleLogout} className="shrink-0">
             <LogOut className="h-5 w-5" />
+            <span className="ml-2">Logout</span>
           </Button>
         </div>
       </header>
