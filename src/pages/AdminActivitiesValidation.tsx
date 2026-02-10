@@ -23,6 +23,8 @@ type ActivityRow = {
   notes: string | null;
   start_photo_url: string | null;
   end_photo_url: string | null;
+  start_odometer_photo_url: string | null;
+  end_odometer_photo_url: string | null;
   client_id: string | null;
   location_id: string | null;
   service_id: string | null;
@@ -102,7 +104,7 @@ const AdminActivitiesValidation = () => {
       const { data: activities, error: activitiesError } = await supabase
         .from("activities")
         .select(
-          "id, machine_id, operator_id, start_time, end_time, status, start_odometer, end_odometer, notes, start_photo_url, end_photo_url, client_id, location_id, service_id, performance_rating, area_value, area_unit",
+          "id, machine_id, operator_id, start_time, end_time, status, start_odometer, end_odometer, notes, start_photo_url, end_photo_url, start_odometer_photo_url, end_odometer_photo_url, client_id, location_id, service_id, performance_rating, area_value, area_unit",
         )
         .eq("status", "PENDING_VALIDATION")
         .order("created_at", { ascending: false });
@@ -355,6 +357,8 @@ const AdminActivitiesValidation = () => {
           }}
           startPhotoPath={selectedActivity?.start_photo_url ?? null}
           endPhotoPath={selectedActivity?.end_photo_url ?? null}
+          startOdometerPhotoPath={selectedActivity?.start_odometer_photo_url ?? null}
+          endOdometerPhotoPath={selectedActivity?.end_odometer_photo_url ?? null}
           title={selectedActivity ? `Atividade ${selectedActivity.id}` : undefined}
         />
       </main>

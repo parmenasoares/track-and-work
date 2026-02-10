@@ -39,9 +39,13 @@ const Activity = () => {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [photoData, setPhotoData] = useState<string | null>(null);
-  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
+  const [captureTarget, setCaptureTarget] = useState<"selfie" | "odometer">("selfie");
+
+  const [selfieData, setSelfieData] = useState<string | null>(null);
+  const [selfieBlob, setSelfieBlob] = useState<Blob | null>(null);
+  const [odometerData, setOdometerData] = useState<string | null>(null);
+  const [odometerBlob, setOdometerBlob] = useState<Blob | null>(null);
 
   const [formData, setFormData] = useState({
     clientId: "",
@@ -128,10 +132,11 @@ const Activity = () => {
     }
   };
 
-  const startCamera = async () => {
+  const startCamera = async (target: "selfie" | "odometer") => {
     try {
+      setCaptureTarget(target);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
+        video: { facingMode: target === "selfie" ? "user" : "environment" },
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -154,13 +159,23 @@ const Activity = () => {
         canvasRef.current.height = videoRef.current.videoHeight;
         context.drawImage(videoRef.current, 0, 0);
         const imageData = canvasRef.current.toDataURL("image/jpeg");
-        setPhotoData(imageData);
 
         try {
           const blob = await (await fetch(imageData)).blob();
-          setPhotoBlob(blob);
+
+          if (captureTarget === "selfie") {
+            setSelfieData(imageData);
+            setSelfieBlob(blob);
+          } else {
+            setOdometerData(imageData);
+            setOdometerBlob(blob);
+          }
         } catch {
-          setPhotoBlob(null);
+          if (captureTarget === "selfie") {
+            setSelfieBlob(null);
+          } else {
+            setOdometerBlob(null);
+          }
         }
 
         const stream = videoRef.current.srcObject as MediaStream;
@@ -195,10 +210,19 @@ const Activity = () => {
       return;
     }
 
-    if (!photoData || !photoBlob) {
+    if (!selfieData || !selfieBlob) {
       toast({
         title: t("error"),
-        description: "Please take a selfie first",
+        description: "Tire a selfie primeiro",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!odometerData || !odometerBlob) {
+      toast({
+        title: t("error"),
+        description: "Tire a foto do hodômetro primeiro",
         variant: "destructive",
       });
       return;
@@ -218,11 +242,18 @@ const Activity = () => {
       const performanceRating = Number(formData.performanceRating);
 
       if (step === "start") {
-        const startPhotoPath = await uploadActivityPhoto({
-          userId: user.id,
-          blob: photoBlob,
-          prefix: "start",
-        });
+        const [startSelfiePath, startOdometerPath] = await Promise.all([
+          uploadActivityPhoto({
+            userId: user.id,
+            blob: selfieBlob,
+            prefix: "start",
+          }),
+          uploadActivityPhoto({
+            userId: user.id,
+            blob: odometerBlob,
+            prefix: "start-odometer",
+          }),
+        ]);
 
         const { data, error } = await supabase
           .from("activities")
@@ -235,7 +266,8 @@ const Activity = () => {
             operator_id: user.id,
             start_odometer: parseFloat(formData.odometer),
             start_gps: location,
-            start_photo_url: startPhotoPath,
+            start_photo_url: startSelfiePath,
+            start_odometer_photo_url: startOdometerPath,
             notes: formData.notes,
 
             // we only require rating at the end step
@@ -243,7 +275,7 @@ const Activity = () => {
             area_value: null,
             area_unit: null,
             area_notes: null,
-          })
+          } as any)
           .select()
           .single();
 
@@ -251,8 +283,10 @@ const Activity = () => {
 
         setCurrentActivity(data.id);
         setStep("end");
-        setPhotoData(null);
-        setPhotoBlob(null);
+        setSelfieData(null);
+        setSelfieBlob(null);
+        setOdometerData(null);
+        setOdometerBlob(null);
         setFormData((prev) => ({
           ...prev,
           odometer: "",
@@ -266,11 +300,18 @@ const Activity = () => {
       } else {
         if (!currentActivity) throw new Error("No active activity");
 
-        const endPhotoPath = await uploadActivityPhoto({
-          userId: user.id,
-          blob: photoBlob,
-          prefix: "end",
-        });
+        const [endSelfiePath, endOdometerPath] = await Promise.all([
+          uploadActivityPhoto({
+            userId: user.id,
+            blob: selfieBlob,
+            prefix: "end",
+          }),
+          uploadActivityPhoto({
+            userId: user.id,
+            blob: odometerBlob,
+            prefix: "end-odometer",
+          }),
+        ]);
 
         const { error } = await supabase
           .from("activities")
@@ -278,14 +319,15 @@ const Activity = () => {
             end_time: new Date().toISOString(),
             end_odometer: parseFloat(formData.odometer),
             end_gps: location,
-            end_photo_url: endPhotoPath,
+            end_photo_url: endSelfiePath,
+            end_odometer_photo_url: endOdometerPath,
             notes: formData.notes,
 
             performance_rating: performanceRating,
             area_value: Number.isFinite(areaValue as any) ? areaValue : null,
             area_unit: formData.areaUnit?.trim() || null,
             area_notes: formData.areaNotes?.trim() || null,
-          })
+          } as any)
           .eq("id", currentActivity);
 
         if (error) throw error;
@@ -481,39 +523,77 @@ const Activity = () => {
               </>
             )}
 
-            <div className="space-y-2">
-              <Label>{t("takeSelfie")}</Label>
-              {!cameraActive && !photoData && (
-                <Button type="button" variant="outline" className="w-full" onClick={startCamera}>
-                  <Camera className="mr-2 h-4 w-4" />
-                  {t("takeSelfie")}
-                </Button>
-              )}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Selfie (obrigatório)</Label>
+                {!cameraActive && !selfieData && (
+                  <Button type="button" variant="outline" className="w-full" onClick={() => startCamera("selfie")}
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    {t("takeSelfie")}
+                  </Button>
+                )}
+                {selfieData && (
+                  <div className="space-y-2">
+                    <img src={selfieData} alt="Selfie" className="w-full rounded-lg border" />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setSelfieData(null);
+                        setSelfieBlob(null);
+                        startCamera("selfie");
+                      }}
+                      disabled={cameraActive}
+                    >
+                      Retake
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Foto do hodômetro (obrigatório)</Label>
+                {!cameraActive && !odometerData && (
+                  <Button type="button" variant="outline" className="w-full" onClick={() => startCamera("odometer")}
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    Tirar foto do hodômetro
+                  </Button>
+                )}
+                {odometerData && (
+                  <div className="space-y-2">
+                    <img src={odometerData} alt="Foto do hodômetro" className="w-full rounded-lg border" />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setOdometerData(null);
+                        setOdometerBlob(null);
+                        startCamera("odometer");
+                      }}
+                      disabled={cameraActive}
+                    >
+                      Retake
+                    </Button>
+                  </div>
+                )}
+              </div>
+
               {cameraActive && (
                 <div className="space-y-2">
                   <video ref={videoRef} autoPlay className="w-full rounded-lg border" />
                   <Button type="button" className="w-full" onClick={capturePhoto}>
                     Capture
                   </Button>
+                  <p className="text-xs text-muted-foreground">
+                    A capturar: {captureTarget === "selfie" ? "Selfie" : "Hodômetro"}
+                  </p>
                 </div>
               )}
-              {photoData && (
-                <div className="space-y-2">
-                  <img src={photoData} alt="Selfie" className="w-full rounded-lg border" />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      setPhotoData(null);
-                      setPhotoBlob(null);
-                      startCamera();
-                    }}
-                  >
-                    Retake
-                  </Button>
-                </div>
-              )}
+
               <canvas ref={canvasRef} className="hidden" />
             </div>
 

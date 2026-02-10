@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           end_gps: Json | null
           end_odometer: number | null
+          end_odometer_photo_url: string | null
           end_photo_url: string | null
           end_time: string | null
           id: string
@@ -34,6 +35,7 @@ export type Database = {
           service_id: string | null
           start_gps: Json | null
           start_odometer: number
+          start_odometer_photo_url: string | null
           start_photo_url: string | null
           start_time: string
           status: string
@@ -47,6 +49,7 @@ export type Database = {
           created_at?: string
           end_gps?: Json | null
           end_odometer?: number | null
+          end_odometer_photo_url?: string | null
           end_photo_url?: string | null
           end_time?: string | null
           id?: string
@@ -58,6 +61,7 @@ export type Database = {
           service_id?: string | null
           start_gps?: Json | null
           start_odometer: number
+          start_odometer_photo_url?: string | null
           start_photo_url?: string | null
           start_time?: string
           status?: string
@@ -71,6 +75,7 @@ export type Database = {
           created_at?: string
           end_gps?: Json | null
           end_odometer?: number | null
+          end_odometer_photo_url?: string | null
           end_photo_url?: string | null
           end_time?: string | null
           id?: string
@@ -82,6 +87,7 @@ export type Database = {
           service_id?: string | null
           start_gps?: Json | null
           start_odometer?: number
+          start_odometer_photo_url?: string | null
           start_photo_url?: string | null
           start_time?: string
           status?: string
