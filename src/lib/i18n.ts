@@ -19,7 +19,7 @@ export const translations = {
     signUpHere: 'Cadastre-se aqui',
     
     // Dashboard
-    appTitle: 'Controle de Frota',
+    appTitle: 'AGRO-X CONTROL',
     welcomeBack: 'Bem-vindo',
     dashboard: 'Painel',
     activityRecord: 'Registro de Atividade',
@@ -164,7 +164,7 @@ export const translations = {
     signUpHere: 'Sign up here',
     
     // Dashboard
-    appTitle: 'Fleet Control',
+    appTitle: 'AGRO-X CONTROL',
     welcomeBack: 'Welcome back',
     dashboard: 'Dashboard',
     activityRecord: 'Activity Record',
