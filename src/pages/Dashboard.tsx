@@ -14,6 +14,7 @@ import {
   Headset,
   LogOut,
   ShieldCheck,
+  TrendingUp,
 } from 'lucide-react';
 
 type DashboardBtn = {
@@ -153,10 +154,16 @@ const Dashboard = () => {
 
           <div className="flex items-center gap-2 shrink-0">
             {isSuperAdmin && (
-              <Button variant="outline" onClick={() => navigate('/admin/users')}>
-                <ShieldCheck className="h-5 w-5" />
-                <span className="ml-2">{t('userManagement')}</span>
-              </Button>
+              <>
+                <Button variant="outline" onClick={() => navigate('/admin/dashboard')}>
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="ml-2 hidden sm:inline">Dashboard</span>
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/admin/users')}>
+                  <ShieldCheck className="h-5 w-5" />
+                  <span className="ml-2 hidden sm:inline">{t('userManagement')}</span>
+                </Button>
+              </>
             )}
 
             <Button variant="ghost" onClick={handleLogout}>
