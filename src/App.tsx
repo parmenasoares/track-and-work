@@ -12,6 +12,7 @@ import LanguageSelect from "./pages/LanguageSelect";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Activity from "./pages/Activity";
+import CloseActivity from "./pages/CloseActivity";
 import Maintenance from "./pages/Maintenance";
 import Damages from "./pages/Damages";
 import Fuel from "./pages/Fuel";
@@ -63,6 +64,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Activity />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/activity/close"
+              element={
+                <ProtectedRoute>
+                  <CloseActivity />
                 </ProtectedRoute>
               }
             />
