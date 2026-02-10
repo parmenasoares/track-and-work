@@ -40,6 +40,14 @@ const Login = () => {
         });
         if (error) throw error;
 
+        // Ensure base rows exist for new users (roles/compliance)
+        const [{ error: e1 }, { error: e2 }] = await Promise.all([
+          supabase.rpc('ensure_current_user_row'),
+          supabase.rpc('ensure_user_compliance_rows'),
+        ]);
+        if (e1) throw e1;
+        if (e2) throw e2;
+
         toast({
           title: t('success'),
           description: t('login') + ' ' + t('success').toLowerCase(),

@@ -34,6 +34,7 @@ const Dashboard = () => {
   const [userEmail, setUserEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isCoordinator, setIsCoordinator] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -54,14 +55,16 @@ const Dashboard = () => {
       if (user) {
         setUserEmail(user.email || '');
 
-        const [{ data: profile }, { data: adminFlag }, { data: superAdminFlag }] = await Promise.all([
+        const [{ data: profile }, { data: adminFlag }, { data: superAdminFlag }, { data: coordinatorFlag }] = await Promise.all([
           supabase.from('users').select('first_name, last_name').eq('id', user.id).maybeSingle(),
           supabase.rpc('is_admin_or_super_admin', { _user_id: user.id }),
           supabase.rpc('is_user_role', { _user_id: user.id, _role: 'SUPER_ADMIN' }),
+          supabase.rpc('is_coordenador_or_above', { _user_id: user.id }),
         ]);
 
         setIsAdmin(!!adminFlag);
         setIsSuperAdmin(!!superAdminFlag);
+        setIsCoordinator(!!coordinatorFlag);
 
         if (profile) {
           setUserName(`${profile.first_name || ''} ${profile.last_name || ''}`.trim() || user.email || '');
@@ -126,7 +129,22 @@ const Dashboard = () => {
         path: '/support',
         variant: 'secondary',
       },
+      {
+        icon: ClipboardList,
+        label: t('myDocuments'),
+        path: '/my-documents',
+        variant: 'outline',
+      },
     ];
+
+    if (isCoordinator) {
+      base.unshift({
+        icon: ShieldCheck,
+        label: t('approvals'),
+        path: '/admin/approvals',
+        variant: 'outline',
+      });
+    }
 
     if (isAdmin) {
       base.unshift({
@@ -138,7 +156,7 @@ const Dashboard = () => {
     }
 
     return base;
-  }, [isAdmin, t]);
+  }, [isAdmin, isCoordinator, t]);
 
   return (
     <div className="min-h-screen bg-background">
