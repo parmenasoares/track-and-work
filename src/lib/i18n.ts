@@ -41,6 +41,16 @@ export const translations = {
     notAuthorized: 'Sem autorização para esta ação.',
     cannotChangeSelf: 'Por segurança, não pode alterar a sua própria permissão.',
     invalidEmail: 'E-mail inválido.',
+
+    // Roles audit
+    roleAuditTitle: 'Auditoria de permissões',
+    roleAuditDescription: 'Histórico de promoções/rebaixamentos (user_roles).',
+    filterByEmail: 'Filtrar por e-mail (alvo ou autor)',
+    targetUser: 'Utilizador (alvo)',
+    changedBy: 'Alterado por',
+    changedAt: 'Data/Hora',
+    noRoleChanges: 'Nenhuma alteração de permissões encontrada.',
+
     startActivity: 'Iniciar Atividade',
     endActivity: 'Finalizar Atividade',
     selectMachine: 'Selecionar Máquina',
@@ -126,6 +136,15 @@ export const translations = {
     notAuthorized: 'You are not allowed to perform this action.',
     cannotChangeSelf: 'For safety, you cannot change your own role.',
     invalidEmail: 'Invalid email address.',
+
+    // Roles audit
+    roleAuditTitle: 'Role audit',
+    roleAuditDescription: 'History of promotions/demotions (user_roles).',
+    filterByEmail: 'Filter by email (target or actor)',
+    targetUser: 'Target user',
+    changedBy: 'Changed by',
+    changedAt: 'Date/Time',
+    noRoleChanges: 'No role changes found.',
 
     // Activity registration
     startActivity: 'Start Activity',
