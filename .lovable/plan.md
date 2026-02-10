@@ -1,171 +1,57 @@
 
 Objetivo
-- Implementar duas novas áreas no app:
-  1) “Meus Documentos” (para o utilizador preencher dados de compliance + fazer upload dos documentos no bucket privado `user-documents`)
-  2) “Aprovações” (para Coordenador/Admin validar/rejeitar utilizadores e consultar os documentos via links assinados)
+- Atualizar a frase “Controlo de máquinas e herdade — ...” para um texto 100% alinhado com a marca AGRO-X CONTROL, em PT-PT e EN, e mover esse texto para o sistema de traduções (i18n), para ficar consistente e fácil de manter.
 
-Pré-requisito (segurança)
-- Confirmar que a proteção “Leaked password protection” já está ativa no backend. (Sem isso, o último alerta de segurança não some.)
-- Se ainda não estiver ativa, a implementação pode avançar do mesmo jeito, mas o alerta não será removido até ativar.
+Contexto (o que existe hoje)
+- A frase está hardcoded em `src/pages/Login.tsx` (linha ~128-130).
+- O i18n vive em `src/lib/i18n.ts` e o hook `useLanguage()` expõe `t(key)` onde `key` tem de existir em `translations.pt` (e também em `translations.en`).
+- O título principal já vem de `t("appTitle")` no header do dashboard; a frase do login ainda não está em i18n.
 
-O que já existe (confirmado no projeto)
-- Tabelas e RLS já criadas:
-  - `user_compliance` (dados: NIF/NISS/IBAN/morada…)
-  - `user_verifications` (status PENDING/APPROVED/REJECTED + auditoria)
-  - `user_document_files` (metadados: doc_type + storage_path etc.)
-- Bucket privado `user-documents` já criado + policies em `storage.objects`:
-  - Inserir: permitido apenas para o próprio utilizador (pasta `userId/...`)
-  - Ler: permitido para o dono e para `is_coordenador_or_above`
-  - Deletar: apenas `is_coordenador_or_above` (hoje o próprio utilizador NÃO consegue apagar para substituir)
-- Função já criada: `ensure_user_compliance_rows()` para garantir linhas base em `user_compliance` e `user_verifications`.
+Decisão de copy (confirmada)
+- Tom escolhido: “Operacional e direto”.
 
-Problemas que precisamos resolver antes/ao implementar as telas
-1) Inicialização de linhas
-- Hoje o app não chama `ensure_user_compliance_rows()` automaticamente após login/signup.
-- Se um utilizador novo entrar em “Meus Documentos”, pode não existir linha ainda em `user_compliance` / `user_verifications`.
+Proposta de textos (Operacional e direto)
+- PT-PT (nova tagline):
+  - “Controlo operacional no terreno — rápido, rastreável e mobile-first.”
+- EN:
+  - “Operational field control — fast, traceable, mobile-first.”
 
-2) Substituição de ficheiros (re-upload)
-- Como `user_document_files` tem unique `(user_id, doc_type)`, o utilizador tende a “substituir” o documento do mesmo tipo.
-- Porém, com as policies atuais:
-  - O utilizador consegue inserir/atualizar metadados na tabela, mas não consegue apagar o ficheiro antigo no bucket (DELETE só para coordenador).
-  - Se fizermos re-upload sempre com um path novo, ficamos com objetos antigos “órfãos” no storage.
-- Melhor prática: permitir que o próprio utilizador apague os seus próprios objetos em `user-documents` para poder substituir (e opcionalmente permitir apagar o registo em `user_document_files` quando quiser remover).
+Nota: se quiser, posso ajustar 1-2 palavras para encaixar melhor no vosso vocabulário interno (ex.: “operações”, “frota”, “máquinas”), mas a implementação será igual.
 
-Decisões de UX (sem bloquear, mas definem a tela)
-- “Meus Documentos” terá:
-  - Secção 1: Dados (NIF, NISS, IBAN, morada…)
-  - Secção 2: Upload de documentos por tipo (CC, PASSPORT, etc.)
-  - Secção 3: Estado da verificação + botão “Submeter para aprovação”
-- “Aprovações” terá:
-  - Lista de utilizadores com status PENDING
-  - Detalhe do utilizador: dados + links para abrir/baixar documentos
-  - Ações: Aprovar / Rejeitar com notas
+Alterações planeadas (código)
+1) i18n: adicionar nova chave para a tagline
+- Ficheiro: `src/lib/i18n.ts`
+- Adicionar uma nova key (ex.: `appTagline`) dentro de:
+  - `translations.pt.appTagline`
+  - `translations.en.appTagline`
+- Garantir que a key existe em ambos os idiomas para não quebrar o TypeScript nem o runtime.
 
-Implementação — Backend (migração SQL)
-A) Permitir substituição/limpeza de documentos pelo próprio utilizador (recomendado)
-- Storage (`storage.objects`):
-  - Adicionar policy de DELETE para o dono do ficheiro no bucket `user-documents` quando o path começar por `auth.uid()/...`.
-  - (Opcional) Adicionar policy de UPDATE se quisermos suportar “upsert” de storage, mas não é obrigatório; podemos trabalhar com delete+insert.
-- Database (`public.user_document_files`):
-  - Adicionar policy de DELETE para o dono (user_id = auth.uid()) e/ou para coordenador+.
-  - Isto permite o utilizador remover um documento (metadado) e fazer upload novamente sem deixar lixo.
+2) UI: trocar texto hardcoded por tradução
+- Ficheiro: `src/pages/Login.tsx`
+- Substituir o `<p>` com a frase hardcoded por:
+  - `{t("appTagline")}`
 
-B) (Opcional, mas útil) Restringir uploads por tipo MIME e tamanho via app
-- Não é policy do DB; vamos validar no frontend (ex: aceitar PDF + imagens, 10MB).
+3) (Opcional, mas recomendado) Consistência do branding no Login
+- Se o texto “AGRO-X CONTROL” (o label pequeno acima do H1) estiver hardcoded, podemos manter assim (não é problema), ou mover também para `t("appTitle")` para ficar 100% consistente com o resto.
+- Só faço isto se concordar, porque é uma mudança pequena mas mexe no UI.
 
-Implementação — Frontend (novas páginas e rotas)
-1) Criar uma rota/página “Meus Documentos”
-- Novo ficheiro: `src/pages/MyDocuments.tsx`
-- Funcionalidades:
-  - Ao carregar, garantir linhas base:
-    - `supabase.rpc("ensure_current_user_row")` (para garantir `users`)
-    - `supabase.rpc("ensure_user_compliance_rows")`
-  - Buscar:
-    - `user_compliance` do utilizador logado
-    - `user_verifications` do utilizador logado
-    - `user_document_files` do utilizador logado
-  - Form de compliance:
-    - Inputs para nif/niss/iban/morada
-    - Guardar via upsert/update (RLS permite ALL do próprio)
-  - Upload por tipo de documento:
-    - Para cada `document_type` (enum), mostrar card com:
-      - Estado: “Não enviado” / “Enviado em dd/mm” (via `user_document_files.created_at`)
-      - Botão “Enviar/Substituir”
-      - (Opcional) Botão “Remover”
-    - Upload flow (por doc_type):
-      - Validar: tamanho <= 10MB e tipo `image/*` ou `application/pdf`
-      - Se existir documento anterior:
-        - Se tivermos policy de delete do dono: apagar objeto antigo no storage (pelo `storage_path`)
-      - Fazer upload para `user-documents` com path: `${userId}/${doc_type}/${uuid}-${originalName}`
-      - Upsert em `user_document_files` (como existe unique por tipo) para atualizar `storage_path`, `file_name`, `mime_type`, `size_bytes`
-  - “Submeter para aprovação”:
-    - Atualizar `user_verifications`:
-      - `status = 'PENDING'`
-      - `submitted_at = now()`
-      - limpar `review_notes`, `reviewed_at`, `reviewed_by` (opcional)
-    - Mostrar feedback ao utilizador (toast)
+Plano de testes (end-to-end)
+- Teste PT:
+  1. Abrir o app numa janela privada (ou limpar `fleet_language` no localStorage).
+  2. Selecionar “Português (Portugal)”.
+  3. Ir ao Login e confirmar que a frase aparece em PT-PT e está correta visualmente (quebra de linha, tamanhos).
+- Teste EN:
+  1. Trocar para “English”.
+  2. Confirmar que a mesma área mostra a versão EN.
+- Teste de regressão:
+  - Confirmar que não há erros de TypeScript e que `t("appTagline")` não devolve `undefined`.
 
-2) Criar uma rota/página “Aprovações”
-- Novo ficheiro: `src/pages/AdminApprovals.tsx` (nome pode ser “Approvals”)
-- Acesso:
-  - Criar componente de rota novo `CoordinatorRoute`:
-    - Similar ao `AdminRoute`, mas usando RPC `is_coordenador_or_above`
-    - Permite COORDENADOR, ADMIN, SUPER_ADMIN
-- Funcionalidades da página:
-  - Lista de `user_verifications` com `status='PENDING'`, ordenado por `submitted_at desc`
-  - Para cada utilizador:
-    - Carregar perfil (tabela `users`) e dados `user_compliance`
-    - Carregar `user_document_files` do utilizador
-  - Visualização de documentos:
-    - Para cada doc, criar link assinado temporário (ex: 60s) via `supabase.storage.from("user-documents").createSignedUrl(storage_path, 60)`
-    - Botão “Abrir” / “Baixar”
-  - Ações:
-    - Aprovar:
-      - `status='APPROVED'`, `reviewed_at=now()`, `reviewed_by=auth.uid()`, `review_notes` opcional
-    - Rejeitar:
-      - `status='REJECTED'`, `reviewed_at=now()`, `reviewed_by=auth.uid()`, `review_notes` obrigatório (para orientar correção)
-  - Após aprovar/rejeitar:
-    - invalidar queries do React Query e atualizar lista
+Impacto e risco
+- Baixo risco: é uma troca de texto + nova key no i18n.
+- Benefício: copy consistente, traduzível e centralizada (fácil de alterar no futuro sem “caçar” strings no UI).
 
-3) Navegação
-- Adicionar botões/atalhos no Dashboard:
-  - Para todos: “Meus Documentos”
-  - Para coordenador+: “Aprovações”
-- Adicionar rotas em `src/App.tsx`:
-  - `/my-documents` protegido por `ProtectedRoute`
-  - `/admin/approvals` protegido por `CoordinatorRoute`
-
-4) Textos e internacionalização
-- Atualizar `src/lib/i18n.ts` com chaves novas em PT/EN, por exemplo:
-  - myDocuments, approvals, submitForApproval, verificationStatus, approved, rejected, pending, upload, replace, remove, reviewNotes, etc.
-- Manter a maior parte dos rótulos em PT (como o resto do projeto), mas com fallback EN consistente.
-
-Implementação — Ajuste no Login (robustez)
-- Após login bem-sucedido e após signup (quando o utilizador fizer o primeiro login), chamar:
-  - `ensure_current_user_row()` e `ensure_user_compliance_rows()`
-- Benefício: garante que as páginas “Dashboard” e “Meus Documentos” sempre encontram as linhas necessárias.
-
-Testes (end-to-end)
-1) Fluxo do utilizador (OPERADOR)
-- Criar conta > confirmar email > login
-- Abrir “Meus Documentos”
-- Preencher NIF/NISS/IBAN/morada e salvar
-- Upload de 1 documento (ex: CC) e verificar se aparece como “enviado”
-- Substituir o mesmo documento e confirmar que:
-  - O metadado atualiza
-  - O ficheiro antigo é removido (se implementarmos delete do dono)
-- Clicar “Submeter para aprovação” e confirmar status “PENDING”
-
-2) Fluxo do coordenador/admin
-- Entrar como COORDENADOR/ADMIN
-- Abrir “Aprovações”
-- Abrir documentos (links assinados)
-- Rejeitar com nota e confirmar que o utilizador vê a nota em “Meus Documentos”
-- Aprovar e confirmar status final
-
-3) Segurança/RLS
-- Confirmar que um utilizador não consegue ler documentos de outro utilizador
-- Confirmar que coordenador+ consegue ler e rever
-
-Arquivos que serão alterados/criados (quando aprovar o plano)
-- Criar:
-  - `src/pages/MyDocuments.tsx`
-  - `src/pages/AdminApprovals.tsx`
-  - `src/components/CoordinatorRoute.tsx` (ou `src/components/CoordinatorOrAboveRoute.tsx`)
-- Editar:
-  - `src/App.tsx` (rotas)
-  - `src/pages/Dashboard.tsx` (atalhos)
-  - `src/pages/Login.tsx` (chamar ensure_* após auth)
-  - `src/lib/i18n.ts` (novas chaves)
-- Migração SQL:
-  - Policies adicionais para permitir delete do próprio utilizador em `user-documents` e (opcional) delete em `user_document_files`
-
-Riscos e mitigação
-- Links assinados expiram rápido (60s): OK por segurança; vamos gerar novamente ao clicar “Abrir” se necessário.
-- Se não permitirmos delete pelo dono no storage: haverá objetos órfãos. Por isso o plano recomenda adicionar a policy de DELETE do dono.
-- Tipos de documento fixos no enum: a UI vai suportar os que já existem hoje; se mais tipos forem necessários no futuro, faremos nova migração para expandir o enum.
-
-Resultado esperado
-- Utilizadores conseguem enviar documentos e submeter para aprovação.
-- Coordenadores/Admins conseguem aprovar/rejeitar com notas e visualizar documentos com segurança via links temporários.
-- O processo fica alinhado com o fluxo administrativo já existente no sistema.
+Checklist de aceitação
+- [ ] A frase do Login não está hardcoded.
+- [ ] A frase muda corretamente entre PT e EN.
+- [ ] Não há erros no console relacionados com tradução em falta.
+- [ ] O tom final está “operacional e direto”, como definido.
