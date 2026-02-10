@@ -10,18 +10,26 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
+  const normalizeLanguage = (raw: string | null): Language => {
+    // Backwards-compat: older versions may have stored "pt-PT".
+    if (raw === "pt-PT") return "pt";
+    if (raw === "en") return "en";
+    return "pt";
+  };
+
   const [language, setLanguageState] = useState<Language>(() => {
-    const stored = localStorage.getItem('fleet_language');
-    return (stored as Language) || 'pt';
+    const stored = localStorage.getItem("fleet_language");
+    return normalizeLanguage(stored);
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('fleet_language', lang);
+    localStorage.setItem("fleet_language", lang);
   };
 
   const t = (key: TranslationKey): string => {
-    return translations[language][key];
+    // Safety fallback to avoid blank screens if language storage gets corrupted.
+    return translations[language]?.[key] ?? translations.pt[key] ?? String(key);
   };
 
   return (
