@@ -12,7 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BrandMark } from "@/components/BrandMark";
 import { ArrowLeft, Plus, Pencil, Trash2, RefreshCcw } from "lucide-react";
+
 
 type Machine = {
   id: string;
@@ -207,12 +209,13 @@ const AdminMachines = () => {
       <header className="border-b bg-card sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4 justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}> 
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <BrandMark />
             <div>
               <h1 className="text-2xl font-bold">Gestão de Máquinas</h1>
-              <p className="text-sm text-muted-foreground">Cadastro e gestão completa</p>
+              <p className="text-sm text-muted-foreground">Registo e gestão completa</p>
             </div>
           </div>
 

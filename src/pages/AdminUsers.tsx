@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BrandMark } from "@/components/BrandMark";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/select";
 
 import { ArrowLeft, Loader2, Shield, Trash2 } from "lucide-react";
+
 
 const roleSchema = z.enum(["SUPER_ADMIN", "ADMIN", "COORDENADOR", "OPERADOR"]);
 
@@ -169,6 +171,7 @@ const AdminUsers = () => {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <BrandMark />
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 <Shield className="h-5 w-5" />

@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BrandMark } from "@/components/BrandMark";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/select";
 
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+
 
 type ClientRow = { id: string; name: string };
 type LocationRow = { id: string; name: string; client_id: string };
@@ -202,8 +204,9 @@ const AdminMasterData = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="Back to dashboard">
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <BrandMark />
             <div>
-              <h1 className="text-2xl font-bold">Cadastros</h1>
+              <h1 className="text-2xl font-bold">Registos</h1>
               <p className="text-sm text-muted-foreground">Clientes, Locais e Serviços</p>
             </div>
           </div>
