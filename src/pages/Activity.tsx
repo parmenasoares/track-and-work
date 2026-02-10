@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
+import { uploadActivityPhoto } from '@/lib/activityPhotos';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +24,7 @@ const Activity = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photoData, setPhotoData] = useState<string | null>(null);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -85,7 +87,7 @@ const Activity = () => {
     }
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
       if (context) {
@@ -94,7 +96,15 @@ const Activity = () => {
         context.drawImage(videoRef.current, 0, 0);
         const imageData = canvasRef.current.toDataURL('image/jpeg');
         setPhotoData(imageData);
-        
+
+        // Also keep a Blob version for upload (never store the data URL in the database)
+        try {
+          const blob = await (await fetch(imageData)).blob();
+          setPhotoBlob(blob);
+        } catch {
+          setPhotoBlob(null);
+        }
+
         // Stop camera
         const stream = videoRef.current.srcObject as MediaStream;
         stream?.getTracks().forEach(track => track.stop());
@@ -115,7 +125,7 @@ const Activity = () => {
       return;
     }
 
-    if (!photoData) {
+    if (!photoData || !photoBlob) {
       toast({
         title: t('error'),
         description: 'Please take a selfie first',
@@ -131,6 +141,13 @@ const Activity = () => {
       if (!user) throw new Error('Not authenticated');
 
       if (step === 'start') {
+        // Upload selfie to file storage and store only the file path in the database
+        const startPhotoPath = await uploadActivityPhoto({
+          userId: user.id,
+          blob: photoBlob,
+          prefix: 'start',
+        });
+
         const { data, error } = await supabase
           .from('activities')
           .insert({
@@ -138,19 +155,20 @@ const Activity = () => {
             operator_id: user.id,
             start_odometer: parseFloat(formData.odometer),
             start_gps: location,
-            start_photo_url: photoData,
+            start_photo_url: startPhotoPath,
             notes: formData.notes,
           })
           .select()
           .single();
 
         if (error) throw error;
-        
+
         setCurrentActivity(data.id);
         setStep('end');
         setPhotoData(null);
+        setPhotoBlob(null);
         setFormData({ ...formData, odometer: '', notes: '' });
-        
+
         toast({
           title: t('success'),
           description: 'Activity started successfully!',
@@ -158,13 +176,19 @@ const Activity = () => {
       } else {
         if (!currentActivity) throw new Error('No active activity');
 
+        const endPhotoPath = await uploadActivityPhoto({
+          userId: user.id,
+          blob: photoBlob,
+          prefix: 'end',
+        });
+
         const { error } = await supabase
           .from('activities')
           .update({
             end_time: new Date().toISOString(),
             end_odometer: parseFloat(formData.odometer),
             end_gps: location,
-            end_photo_url: photoData,
+            end_photo_url: endPhotoPath,
             notes: formData.notes,
           })
           .eq('id', currentActivity);
@@ -263,6 +287,7 @@ const Activity = () => {
                     className="w-full"
                     onClick={() => {
                       setPhotoData(null);
+                      setPhotoBlob(null);
                       startCamera();
                     }}
                   >
