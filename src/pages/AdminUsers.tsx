@@ -93,10 +93,10 @@ const AdminUsers = () => {
         : known === "invalid_email"
           ? t("invalidEmail")
           : known === "user_not_found"
-            ? t("userNotFound")
+            ? t("genericError")
             : known === "cannot_change_self"
               ? t("cannotChangeSelf")
-              : err?.message ?? "Unknown error";
+              : t("genericError");
 
     toast({
       title: t("error"),

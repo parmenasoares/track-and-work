@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/hooks/useLanguage';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { getPublicErrorMessage } from "@/lib/publicErrors";
+import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const { t } = useLanguage();
@@ -86,15 +87,19 @@ const Login = () => {
       }));
       setIsLogin(true);
     } catch (err: unknown) {
+      // Avoid leaking internal error details to end users
+      console.error(err);
+
+      // Preserve local validation message
       const message =
-        typeof err === 'object' && err && 'message' in err
-          ? String((err as any).message)
-          : 'Unexpected error';
+        typeof err === "object" && err && "message" in err && String((err as any).message) === "Passwords do not match"
+          ? "Passwords do not match"
+          : getPublicErrorMessage(err, t);
 
       toast({
-        title: t('error'),
+        title: t("error"),
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setLoading(false);

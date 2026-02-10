@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
+import { getPublicErrorMessage } from "@/lib/publicErrors";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -100,7 +101,8 @@ const AdminMasterData = () => {
       toast({ title: t("success"), description: "Cliente criado." });
       await invalidate();
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Erro", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setBusy(null);
     }
@@ -115,7 +117,8 @@ const AdminMasterData = () => {
       toast({ title: t("success"), description: "Cliente removido." });
       await invalidate();
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Erro", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setBusy(null);
     }
@@ -133,7 +136,8 @@ const AdminMasterData = () => {
       toast({ title: t("success"), description: "Local criado." });
       await invalidate();
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Erro", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setBusy(null);
     }
@@ -148,7 +152,8 @@ const AdminMasterData = () => {
       toast({ title: t("success"), description: "Local removido." });
       await invalidate();
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Erro", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setBusy(null);
     }
@@ -166,7 +171,8 @@ const AdminMasterData = () => {
       toast({ title: t("success"), description: "Serviço criado." });
       await invalidate();
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Erro", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setBusy(null);
     }
@@ -181,7 +187,8 @@ const AdminMasterData = () => {
       toast({ title: t("success"), description: "Serviço removido." });
       await invalidate();
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Erro", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setBusy(null);
     }

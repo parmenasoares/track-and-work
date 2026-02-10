@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Constants } from "@/integrations/supabase/types";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
+import { getPublicErrorMessage } from "@/lib/publicErrors";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -132,9 +133,10 @@ const MyDocuments = () => {
 
         await reload(uid);
       } catch (err: any) {
+        console.error(err);
         toast({
           title: t("error"),
-          description: err?.message ?? "Unexpected error",
+          description: getPublicErrorMessage(err, t),
           variant: "destructive",
         });
       } finally {
@@ -171,7 +173,8 @@ const MyDocuments = () => {
       toast({ title: t("success"), description: t("saved") });
       await reload(userId);
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -203,7 +206,8 @@ const MyDocuments = () => {
       toast({ title: t("success"), description: t("removed") });
       await reload(userId);
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setRemovingDocType(null);
     }
@@ -255,7 +259,8 @@ const MyDocuments = () => {
       toast({ title: t("success"), description: t("uploaded") });
       await reload(userId);
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setUploadingDocType(null);
     }
@@ -281,7 +286,8 @@ const MyDocuments = () => {
       toast({ title: t("success"), description: t("submitted") });
       await reload(userId);
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

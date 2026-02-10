@@ -138,6 +138,7 @@ export const translations = {
     error: 'Erro',
     success: 'Sucesso',
     cancel: 'Cancelar',
+    genericError: 'Ocorreu um erro. Tente novamente.',
 
     // Session
     sessionLoadFailed: 'Não foi possível carregar sua sessão',
@@ -283,6 +284,7 @@ export const translations = {
     error: 'Error',
     success: 'Success',
     cancel: 'Cancel',
+    genericError: 'Something went wrong. Please try again.',
 
     // Session
     sessionLoadFailed: 'Unable to load your session',
