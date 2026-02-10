@@ -18,8 +18,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    /* Strong industrial blue */
-    --primary: 210 100% 42%;
+    /* Brand teal (#26c0bb) */
+    --primary: 178 67% 45%;
     --primary-foreground: 0 0% 100%;
 
     /* Neutral gray */
@@ -46,18 +46,18 @@ All colors MUST be HSL.
 
     --border: 210 20% 88%;
     --input: 210 20% 88%;
-    --ring: 210 100% 42%;
+    --ring: 178 67% 45%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 215 25% 15%;
-    --sidebar-primary: 210 100% 42%;
+    --sidebar-primary: 178 67% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 15% 92%;
     --sidebar-accent-foreground: 215 25% 15%;
     --sidebar-border: 210 20% 88%;
-    --sidebar-ring: 210 100% 42%;
+    --sidebar-ring: 178 67% 45%;
   }
 
   .dark {
@@ -71,7 +71,7 @@ All colors MUST be HSL.
     --popover: 215 25% 12%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 210 100% 50%;
+    --primary: 178 67% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 20% 20%;
@@ -94,16 +94,16 @@ All colors MUST be HSL.
 
     --border: 215 20% 22%;
     --input: 215 20% 22%;
-    --ring: 210 100% 50%;
+    --ring: 178 67% 45%;
 
     --sidebar-background: 215 28% 10%;
     --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 210 100% 50%;
+    --sidebar-primary: 178 67% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 20% 18%;
     --sidebar-accent-foreground: 210 20% 95%;
     --sidebar-border: 215 20% 22%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-ring: 178 67% 45%;
   }
 }
 
