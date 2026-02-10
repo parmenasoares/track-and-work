@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Constants } from "@/integrations/supabase/types";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
+import { getPublicErrorMessage } from "@/lib/publicErrors";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -80,7 +81,12 @@ const AdminApprovals = () => {
         setSelectedUserId(data[0].user_id);
       }
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({
+        title: t("error"),
+        description: getPublicErrorMessage(err, t),
+        variant: "destructive",
+      });
     } finally {
       setLoadingList(false);
     }
@@ -112,7 +118,12 @@ const AdminApprovals = () => {
       setCompliance((complianceRes.data as any) ?? null);
       setDocs(((docsRes.data as any) ?? []) as DocumentFileRow[]);
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({
+        title: t("error"),
+        description: getPublicErrorMessage(err, t),
+        variant: "destructive",
+      });
     } finally {
       setLoadingDetail(false);
     }
@@ -137,7 +148,8 @@ const AdminApprovals = () => {
       if (!data?.signedUrl) throw new Error("signed_url_missing");
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     }
   };
 
@@ -183,7 +195,8 @@ const AdminApprovals = () => {
         await loadDetail(selectedUserId);
       }
     } catch (err: any) {
-      toast({ title: t("error"), description: err?.message ?? "Unexpected error", variant: "destructive" });
+      console.error(err);
+      toast({ title: t("error"), description: getPublicErrorMessage(err, t), variant: "destructive" });
     } finally {
       setDeciding(null);
     }

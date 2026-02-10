@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadActivityPhoto } from "@/lib/activityPhotos";
+import { getPublicErrorMessage } from "@/lib/publicErrors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -353,9 +354,10 @@ const Activity = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
+      console.error(error);
       toast({
         title: t("error"),
-        description: error.message,
+        description: getPublicErrorMessage(error, t),
         variant: "destructive",
       });
     } finally {

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
+import { getPublicErrorMessage } from "@/lib/publicErrors";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -147,9 +148,10 @@ const AdminMachines = () => {
       resetForm();
       await qc.invalidateQueries({ queryKey: ["admin", "machines"] });
     } catch (err: any) {
+      console.error(err);
       toast({
         title: t("error"),
-        description: err?.message ?? "Erro desconhecido",
+        description: getPublicErrorMessage(err, t),
         variant: "destructive",
       });
     }
@@ -172,9 +174,10 @@ const AdminMachines = () => {
       setDeletingMachineId(null);
       await qc.invalidateQueries({ queryKey: ["admin", "machines"] });
     } catch (err: any) {
+      console.error(err);
       toast({
         title: t("error"),
-        description: err?.message ?? "Erro ao eliminar máquina",
+        description: getPublicErrorMessage(err, t),
         variant: "destructive",
       });
     }
