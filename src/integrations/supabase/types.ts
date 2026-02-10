@@ -189,6 +189,7 @@ export type Database = {
         Args: { _email: string; _role: Database["public"]["Enums"]["app_role"] }
         Returns: undefined
       }
+      ensure_current_user_row: { Args: never; Returns: undefined }
       is_activity_owner: {
         Args: { _activity_id: string; _user_id: string }
         Returns: boolean
