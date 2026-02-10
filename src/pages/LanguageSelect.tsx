@@ -2,7 +2,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Languages } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 const LanguageSelect = () => {
   const {
     setLanguage
@@ -16,7 +16,7 @@ const LanguageSelect = () => {
       <Card className="w-full max-w-md p-8 space-y-8">
         <div className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <Languages className="w-8 h-8 text-primary" />
+            <MapPin className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">​RYROX CONTROL </h1>
           <p className="text-muted-foreground">Select your language / Selecione o idioma</p>
