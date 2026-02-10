@@ -240,11 +240,17 @@ const Activity = () => {
                     <SelectValue placeholder={t('selectMachine')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {machines?.map((machine) => (
-                      <SelectItem key={machine.id} value={machine.id}>
-                        {machine.name} {machine.model && `- ${machine.model}`}
-                      </SelectItem>
-                    ))}
+                    {machines
+                      ?.filter((m) => m.status === "ACTIVE" || !m.status)
+                      .map((machine) => (
+                        <SelectItem key={machine.id} value={machine.id}>
+                          {machine.internal_id ? `${machine.internal_id} - ` : ""}
+                          {machine.brand ? `${machine.brand} ` : ""}
+                          {machine.name}
+                          {machine.model ? ` ${machine.model}` : ""}
+                          {machine.plate ? ` (${machine.plate})` : ""}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
