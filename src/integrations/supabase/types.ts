@@ -16,15 +16,22 @@ export type Database = {
     Tables: {
       activities: {
         Row: {
+          area_notes: string | null
+          area_unit: string | null
+          area_value: number | null
+          client_id: string | null
           created_at: string
           end_gps: Json | null
           end_odometer: number | null
           end_photo_url: string | null
           end_time: string | null
           id: string
+          location_id: string | null
           machine_id: string
           notes: string | null
           operator_id: string
+          performance_rating: number | null
+          service_id: string | null
           start_gps: Json | null
           start_odometer: number
           start_photo_url: string | null
@@ -33,15 +40,22 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          area_notes?: string | null
+          area_unit?: string | null
+          area_value?: number | null
+          client_id?: string | null
           created_at?: string
           end_gps?: Json | null
           end_odometer?: number | null
           end_photo_url?: string | null
           end_time?: string | null
           id?: string
+          location_id?: string | null
           machine_id: string
           notes?: string | null
           operator_id: string
+          performance_rating?: number | null
+          service_id?: string | null
           start_gps?: Json | null
           start_odometer: number
           start_photo_url?: string | null
@@ -50,15 +64,22 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          area_notes?: string | null
+          area_unit?: string | null
+          area_value?: number | null
+          client_id?: string | null
           created_at?: string
           end_gps?: Json | null
           end_odometer?: number | null
           end_photo_url?: string | null
           end_time?: string | null
           id?: string
+          location_id?: string | null
           machine_id?: string
           notes?: string | null
           operator_id?: string
+          performance_rating?: number | null
+          service_id?: string | null
           start_gps?: Json | null
           start_odometer?: number
           start_photo_url?: string | null
@@ -67,6 +88,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "activities_client_fk"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_location_fk"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "activities_machine_id_fkey"
             columns: ["machine_id"]
@@ -79,6 +114,66 @@ export type Database = {
             columns: ["operator_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_service_fk"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      locations: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_client_fk"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -118,6 +213,27 @@ export type Database = {
           plate?: string | null
           serial_number?: string | null
           status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
           updated_at?: string
         }
         Relationships: []

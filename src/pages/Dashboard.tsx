@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   TrendingUp,
   Cog,
+  Database,
 } from 'lucide-react';
 
 type DashboardBtn = {
@@ -169,6 +170,13 @@ const Dashboard = () => {
                   <span className="ml-2 hidden sm:inline">{t('userManagement')}</span>
                 </Button>
               </>
+            )}
+
+            {isAdmin && (
+              <Button variant="outline" onClick={() => navigate('/admin/master-data')}>
+                <Database className="h-5 w-5" />
+                <span className="ml-2 hidden sm:inline">Cadastros</span>
+              </Button>
             )}
 
             <Button variant="ghost" onClick={handleLogout}>
