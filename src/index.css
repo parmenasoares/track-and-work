@@ -8,77 +8,77 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Industrial tech theme - clean blues, grays, safety orange */
+    /* Ryrox operational light theme (mobile-first, high legibility) */
     --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --foreground: 215 25% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 215 25% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 215 25% 14%;
 
-    /* Brand teal (#26c0bb) */
-    --primary: 178 67% 45%;
+    /* Ryrox Teal palette (provided):
+       #1693A5 (primary), #45B5C4 (primary-soft), #7ECECA (secondary),
+       #A0DED6 (muted), #C7EDE8 (tint) */
+    --primary: 187 76% 37%;
     --primary-foreground: 0 0% 100%;
 
-    /* Neutral gray */
-    --secondary: 210 15% 88%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary: 176 45% 65%;
+    --secondary-foreground: 215 25% 14%;
 
-    --muted: 210 15% 92%;
-    --muted-foreground: 215 10% 45%;
+    --muted: 174 45% 88%;
+    --muted-foreground: 215 10% 40%;
 
-    /* Safety orange for alerts */
+    /* Keep safety orange for attention/alerts */
     --accent: 28 90% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Success green */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning yellow */
     --warning: 45 93% 47%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 178 67% 45%;
+    --border: 210 18% 88%;
+    --input: 210 18% 88%;
+    --ring: 187 76% 37%;
 
-    --radius: 0.75rem;
+    /* Slightly larger radius for touch-first UI */
+    --radius: 0.9rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 215 25% 15%;
-    --sidebar-primary: 178 67% 45%;
+    --sidebar-foreground: 215 25% 14%;
+    --sidebar-primary: 187 76% 37%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 15% 92%;
-    --sidebar-accent-foreground: 215 25% 15%;
-    --sidebar-border: 210 20% 88%;
-    --sidebar-ring: 178 67% 45%;
+    --sidebar-accent: 174 45% 88%;
+    --sidebar-accent-foreground: 215 25% 14%;
+    --sidebar-border: 210 18% 88%;
+    --sidebar-ring: 187 76% 37%;
   }
 
   .dark {
-    /* Dark mode - darker industrial palette */
+    /* Ryrox operational dark theme (higher contrast, same brand teal) */
     --background: 215 28% 10%;
-    --foreground: 210 20% 95%;
+    --foreground: 210 20% 96%;
 
-    --card: 215 25% 12%;
-    --card-foreground: 210 20% 95%;
+    --card: 215 26% 12%;
+    --card-foreground: 210 20% 96%;
 
-    --popover: 215 25% 12%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 215 26% 12%;
+    --popover-foreground: 210 20% 96%;
 
-    --primary: 178 67% 45%;
+    --primary: 187 76% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 20% 20%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary-foreground: 210 20% 96%;
 
     --muted: 215 20% 18%;
-    --muted-foreground: 210 15% 60%;
+    --muted-foreground: 210 15% 65%;
 
     --accent: 28 90% 55%;
     --accent-foreground: 0 0% 100%;
@@ -94,16 +94,16 @@ All colors MUST be HSL.
 
     --border: 215 20% 22%;
     --input: 215 20% 22%;
-    --ring: 178 67% 45%;
+    --ring: 187 76% 45%;
 
     --sidebar-background: 215 28% 10%;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 178 67% 45%;
+    --sidebar-foreground: 210 20% 96%;
+    --sidebar-primary: 187 76% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 20% 18%;
-    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-accent-foreground: 210 20% 96%;
     --sidebar-border: 215 20% 22%;
-    --sidebar-ring: 178 67% 45%;
+    --sidebar-ring: 187 76% 45%;
   }
 }
 
