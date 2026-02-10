@@ -32,7 +32,7 @@ const DashboardHeader = ({
       <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold tracking-wide text-muted-foreground">
-            RYROX CONTROL
+            RYROX RENTAL CONTROL
           </p>
           <h1 className="text-xl sm:text-2xl font-bold leading-tight">
             {t("appTitle")}
