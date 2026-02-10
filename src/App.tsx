@@ -19,6 +19,7 @@ import Support from "./pages/Support";
 import AdminActivitiesValidation from "./pages/AdminActivitiesValidation";
 import AdminUsers from "./pages/AdminUsers";
 import AdminMachines from "./pages/AdminMachines";
+import AdminMasterData from "./pages/AdminMasterData";
 import RolesAudit from "./pages/RolesAudit";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -96,6 +97,14 @@ const App = () => (
               element={
                 <AdminRoute>
                   <AdminActivitiesValidation />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/master-data"
+              element={
+                <AdminRoute>
+                  <AdminMasterData />
                 </AdminRoute>
               }
             />
