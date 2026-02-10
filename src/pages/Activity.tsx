@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadActivityPhoto } from "@/lib/activityPhotos";
 import { getPublicErrorMessage } from "@/lib/publicErrors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { BrandMark } from "@/components/BrandMark";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Camera, Loader2, MapPin, Upload } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-
 
 type ClientRow = { id: string; name: string };
 type LocationRow = { id: string; name: string; client_id: string };
@@ -40,15 +38,6 @@ const Activity = () => {
   const [step, setStep] = useState<"start" | "end">("start");
   const [currentActivity, setCurrentActivity] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [cameraActive, setCameraActive] = useState(false);
-  const [captureTarget, setCaptureTarget] = useState<"selfie" | "odometer">("selfie");
-
-  const [selfieData, setSelfieData] = useState<string | null>(null);
-  const [selfieBlob, setSelfieBlob] = useState<Blob | null>(null);
-  const [odometerData, setOdometerData] = useState<string | null>(null);
-  const [odometerBlob, setOdometerBlob] = useState<Blob | null>(null);
 
   const [formData, setFormData] = useState({
     clientId: "",
@@ -135,111 +124,6 @@ const Activity = () => {
     }
   };
 
-  const startCamera = async (target: "selfie" | "odometer") => {
-    try {
-      setCaptureTarget(target);
-
-      if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("camera_not_supported");
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: target === "selfie" ? "user" : "environment",
-        },
-        audio: false,
-      });
-
-      if (!videoRef.current) {
-        // Safety: if ref is missing, stop tracks immediately.
-        stream.getTracks().forEach((t) => t.stop());
-        throw new Error("camera_video_ref_missing");
-      }
-
-      const video = videoRef.current;
-      video.srcObject = stream;
-      // iOS Safari: improves reliability
-      video.playsInline = true;
-      video.muted = true;
-
-      // Avoid hanging forever on some mobile browsers where play() never resolves.
-      const waitForMetadata = new Promise<void>((resolve) => {
-        if (video.readyState >= 1) return resolve();
-        const onLoaded = () => {
-          video.removeEventListener("loadedmetadata", onLoaded);
-          resolve();
-        };
-        video.addEventListener("loadedmetadata", onLoaded);
-      });
-
-      const withTimeout = <T,>(p: Promise<T>, ms: number) =>
-        Promise.race([
-          p,
-          new Promise<T>((_, reject) => setTimeout(() => reject(new Error("camera_timeout")), ms)),
-        ]);
-
-      await withTimeout(waitForMetadata, 1500);
-
-      // Try to start playback, but never block UI if it stalls.
-      await withTimeout(video.play().catch(() => undefined), 1500).catch(() => undefined);
-
-      setCameraActive(true);
-    } catch (err: any) {
-      // Ensure we don't leave a half-open stream.
-      const stream = videoRef.current?.srcObject as MediaStream | null;
-      stream?.getTracks().forEach((track) => track.stop());
-      if (videoRef.current) videoRef.current.srcObject = null;
-      setCameraActive(false);
-
-      const msg = `${err?.name ?? "CameraError"}: ${err?.message ?? "Camera access failed"}`;
-      toast({
-        title: t("error"),
-        description: `${msg}. Se continuar, use “Enviar foto”.`,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const capturePhoto = async () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext("2d");
-      if (context) {
-        canvasRef.current.width = videoRef.current.videoWidth;
-        canvasRef.current.height = videoRef.current.videoHeight;
-        context.drawImage(videoRef.current, 0, 0);
-        const imageData = canvasRef.current.toDataURL("image/jpeg");
-
-        try {
-          const blob = await (await fetch(imageData)).blob();
-
-          if (captureTarget === "selfie") {
-            setSelfieData(imageData);
-            setSelfieBlob(blob);
-          } else {
-            setOdometerData(imageData);
-            setOdometerBlob(blob);
-          }
-        } catch {
-          if (captureTarget === "selfie") setSelfieBlob(null);
-          else setOdometerBlob(null);
-        }
-
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream?.getTracks().forEach((track) => track.stop());
-        if (videoRef.current) videoRef.current.srcObject = null;
-        setCameraActive(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      const stream = videoRef.current?.srcObject as MediaStream | null;
-      stream?.getTracks().forEach((t) => t.stop());
-      if (videoRef.current) videoRef.current.srcObject = null;
-    };
-  }, []);
-
   const validateEndStep = () => {
     if (!formData.performanceRating) {
       toast({
@@ -265,24 +149,6 @@ const Activity = () => {
       return;
     }
 
-    if (!selfieData || !selfieBlob) {
-      toast({
-        title: t("error"),
-        description: "Tire a selfie primeiro",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!odometerData || !odometerBlob) {
-      toast({
-        title: t("error"),
-        description: "Tire a foto do hodômetro primeiro",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (step === "end" && !validateEndStep()) return;
 
     setLoading(true);
@@ -297,19 +163,6 @@ const Activity = () => {
       const performanceRating = Number(formData.performanceRating);
 
       if (step === "start") {
-        const [startSelfiePath, startOdometerPath] = await Promise.all([
-          uploadActivityPhoto({
-            userId: user.id,
-            blob: selfieBlob,
-            prefix: "start",
-          }),
-          uploadActivityPhoto({
-            userId: user.id,
-            blob: odometerBlob,
-            prefix: "start-odometer",
-          }),
-        ]);
-
         const { data, error } = await supabase
           .from("activities")
           .insert({
@@ -321,8 +174,6 @@ const Activity = () => {
             operator_id: user.id,
             start_odometer: parseFloat(formData.odometer),
             start_gps: location,
-            start_photo_url: startSelfiePath,
-            start_odometer_photo_url: startOdometerPath,
             notes: formData.notes,
 
             // we only require rating at the end step
@@ -338,10 +189,6 @@ const Activity = () => {
 
         setCurrentActivity(data.id);
         setStep("end");
-        setSelfieData(null);
-        setSelfieBlob(null);
-        setOdometerData(null);
-        setOdometerBlob(null);
         setFormData((prev) => ({
           ...prev,
           odometer: "",
@@ -355,27 +202,12 @@ const Activity = () => {
       } else {
         if (!currentActivity) throw new Error("No active activity");
 
-        const [endSelfiePath, endOdometerPath] = await Promise.all([
-          uploadActivityPhoto({
-            userId: user.id,
-            blob: selfieBlob,
-            prefix: "end",
-          }),
-          uploadActivityPhoto({
-            userId: user.id,
-            blob: odometerBlob,
-            prefix: "end-odometer",
-          }),
-        ]);
-
         const { error } = await supabase
           .from("activities")
           .update({
             end_time: new Date().toISOString(),
             end_odometer: parseFloat(formData.odometer),
             end_gps: location,
-            end_photo_url: endSelfiePath,
-            end_odometer_photo_url: endOdometerPath,
             notes: formData.notes,
 
             performance_rating: performanceRating,
@@ -579,144 +411,6 @@ const Activity = () => {
                 </div>
               </>
             )}
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Selfie (obrigatório)</Label>
-
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => startCamera("selfie")}
-                    disabled={cameraActive}
-                  >
-                    <Camera className="mr-2 h-4 w-4" />
-                    Abrir câmara
-                  </Button>
-
-                  <label className="w-full">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="user"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const f = e.target.files?.[0];
-                        e.currentTarget.value = "";
-                        if (!f) return;
-                        const dataUrl = await new Promise<string>((resolve, reject) => {
-                          const r = new FileReader();
-                          r.onload = () => resolve(String(r.result));
-                          r.onerror = () => reject(new Error("file_read_failed"));
-                          r.readAsDataURL(f);
-                        });
-                        setSelfieData(dataUrl);
-                        setSelfieBlob(f);
-                      }}
-                    />
-                    <Button type="button" variant="outline" className="w-full" disabled={cameraActive}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Enviar foto
-                    </Button>
-                  </label>
-                </div>
-
-                {selfieData && (
-                  <div className="space-y-2">
-                    <img src={selfieData} alt="Selfie" className="w-full rounded-lg border" />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        setSelfieData(null);
-                        setSelfieBlob(null);
-                      }}
-                      disabled={cameraActive}
-                    >
-                      Remover
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Foto do hodômetro (obrigatório)</Label>
-
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => startCamera("odometer")}
-                    disabled={cameraActive}
-                  >
-                    <Camera className="mr-2 h-4 w-4" />
-                    Abrir câmara
-                  </Button>
-
-                  <label className="w-full">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const f = e.target.files?.[0];
-                        e.currentTarget.value = "";
-                        if (!f) return;
-                        const dataUrl = await new Promise<string>((resolve, reject) => {
-                          const r = new FileReader();
-                          r.onload = () => resolve(String(r.result));
-                          r.onerror = () => reject(new Error("file_read_failed"));
-                          r.readAsDataURL(f);
-                        });
-                        setOdometerData(dataUrl);
-                        setOdometerBlob(f);
-                      }}
-                    />
-                    <Button type="button" variant="outline" className="w-full" disabled={cameraActive}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Enviar foto
-                    </Button>
-                  </label>
-                </div>
-
-                {odometerData && (
-                  <div className="space-y-2">
-                    <img src={odometerData} alt="Foto do hodômetro" className="w-full rounded-lg border" />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        setOdometerData(null);
-                        setOdometerBlob(null);
-                      }}
-                      disabled={cameraActive}
-                    >
-                      Remover
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {cameraActive && (
-                <div className="space-y-2">
-                  <video ref={videoRef} autoPlay playsInline muted className="w-full rounded-lg border" />
-                  <Button type="button" className="w-full" onClick={capturePhoto}>
-                    Capture
-                  </Button>
-                  <p className="text-xs text-muted-foreground">
-                    A capturar: {captureTarget === "selfie" ? "Selfie" : "Hodômetro"}
-                  </p>
-                </div>
-              )}
-
-              <canvas ref={canvasRef} className="hidden" />
-            </div>
 
             <div className="space-y-2">
               <Label>{t("location")}</Label>

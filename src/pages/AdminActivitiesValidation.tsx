@@ -4,14 +4,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
-import ActivityPhotosDialog from "@/components/ActivityPhotosDialog";
 import { BrandMark } from "@/components/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, CheckCircle2, Image as ImageIcon, RefreshCcw, ShieldCheck, XCircle } from "lucide-react";
-
+import { ArrowLeft, CheckCircle2, RefreshCcw, ShieldCheck, XCircle } from "lucide-react";
 
 type ActivityRow = {
   id: string;
@@ -23,10 +21,6 @@ type ActivityRow = {
   start_odometer: number;
   end_odometer: number | null;
   notes: string | null;
-  start_photo_url: string | null;
-  end_photo_url: string | null;
-  start_odometer_photo_url: string | null;
-  end_odometer_photo_url: string | null;
   client_id: string | null;
   location_id: string | null;
   service_id: string | null;
@@ -60,8 +54,6 @@ const AdminActivitiesValidation = () => {
   const qc = useQueryClient();
   const { toast } = useToast();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [photosOpen, setPhotosOpen] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<ActivityRow | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,14 +91,13 @@ const AdminActivitiesValidation = () => {
     };
   }, []);
 
-
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["admin", "pending-activities"],
     queryFn: async () => {
       const { data: activities, error: activitiesError } = await supabase
         .from("activities")
         .select(
-          "id, machine_id, operator_id, start_time, end_time, status, start_odometer, end_odometer, notes, start_photo_url, end_photo_url, start_odometer_photo_url, end_odometer_photo_url, client_id, location_id, service_id, performance_rating, area_value, area_unit",
+          "id, machine_id, operator_id, start_time, end_time, status, start_odometer, end_odometer, notes, client_id, location_id, service_id, performance_rating, area_value, area_unit",
         )
         .eq("status", "PENDING_VALIDATION")
         .order("created_at", { ascending: false });
@@ -315,18 +306,6 @@ const AdminActivitiesValidation = () => {
                     <TableCell>{a.end_time ? new Date(a.end_time).toLocaleString() : "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedActivity(a);
-                            setPhotosOpen(true);
-                          }}
-                        >
-                          <ImageIcon className="mr-2 h-4 w-4" />
-                          Fotos
-                        </Button>
-
                         <Button variant="outline" size="sm" onClick={() => updateStatus(a.id, "APPROVED")}> 
                           <CheckCircle2 className="mr-2 h-4 w-4" />
                           {t("approve")}
@@ -351,19 +330,6 @@ const AdminActivitiesValidation = () => {
             </TableBody>
           </Table>
         </Card>
-
-        <ActivityPhotosDialog
-          open={photosOpen}
-          onOpenChange={(open) => {
-            setPhotosOpen(open);
-            if (!open) setSelectedActivity(null);
-          }}
-          startPhotoPath={selectedActivity?.start_photo_url ?? null}
-          endPhotoPath={selectedActivity?.end_photo_url ?? null}
-          startOdometerPhotoPath={selectedActivity?.start_odometer_photo_url ?? null}
-          endOdometerPhotoPath={selectedActivity?.end_odometer_photo_url ?? null}
-          title={selectedActivity ? `Atividade ${selectedActivity.id}` : undefined}
-        />
       </main>
     </div>
   );
