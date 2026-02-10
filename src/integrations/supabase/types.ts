@@ -122,6 +122,89 @@ export type Database = {
         }
         Relationships: []
       }
+      user_compliance: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          iban: string | null
+          nif: string | null
+          niss: string | null
+          postal_code: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          iban?: string | null
+          nif?: string | null
+          niss?: string | null
+          postal_code?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          iban?: string | null
+          nif?: string | null
+          niss?: string | null
+          postal_code?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_document_files: {
+        Row: {
+          created_at: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          file_name: string | null
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          file_name?: string | null
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          file_name?: string | null
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_document_files_user_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -155,6 +238,47 @@ export type Database = {
           {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_verifications: {
+        Row: {
+          created_at: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["verification_status"]
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_verifications_reviewed_by_fk"
+            columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -202,6 +326,7 @@ export type Database = {
         Returns: undefined
       }
       ensure_current_user_row: { Args: never; Returns: undefined }
+      ensure_user_compliance_rows: { Args: never; Returns: undefined }
       is_activity_owner: {
         Args: { _activity_id: string; _user_id: string }
         Returns: boolean
@@ -219,6 +344,16 @@ export type Database = {
     }
     Enums: {
       app_role: "SUPER_ADMIN" | "ADMIN" | "COORDENADOR" | "OPERADOR"
+      document_type:
+        | "CC"
+        | "PASSPORT"
+        | "RESIDENCE_TITLE"
+        | "AIMA_APPOINTMENT_PROOF"
+        | "NISS_PROOF"
+        | "NIF_PROOF"
+        | "IBAN_PROOF"
+        | "ADDRESS_PROOF"
+      verification_status: "PENDING" | "APPROVED" | "REJECTED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -347,6 +482,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["SUPER_ADMIN", "ADMIN", "COORDENADOR", "OPERADOR"],
+      document_type: [
+        "CC",
+        "PASSPORT",
+        "RESIDENCE_TITLE",
+        "AIMA_APPOINTMENT_PROOF",
+        "NISS_PROOF",
+        "NIF_PROOF",
+        "IBAN_PROOF",
+        "ADDRESS_PROOF",
+      ],
+      verification_status: ["PENDING", "APPROVED", "REJECTED"],
     },
   },
 } as const
