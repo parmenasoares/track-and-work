@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/hooks/useLanguage';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import {
   ClipboardList,
   Wrench,
@@ -12,26 +10,18 @@ import {
   Fuel,
   Package,
   Headset,
-  LogOut,
   ShieldCheck,
-  TrendingUp,
-  Cog,
-  Database,
-} from 'lucide-react';
-
-type DashboardBtn = {
-  icon: any;
-  label: string;
-  path: string;
-  variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
-};
+} from "lucide-react";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardGrid, { type DashboardBtn } from "@/components/dashboard/DashboardGrid";
 
 const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
+
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isCoordinator, setIsCoordinator] = useState(false);
@@ -45,34 +35,36 @@ const Dashboard = () => {
 
       if (error) {
         toast({
-          title: t('error'),
-          description: `${t('sessionLoadFailed')}: ${error.message}`,
-          variant: 'destructive',
+          title: t("error"),
+          description: `${t("sessionLoadFailed")}: ${error.message}`,
+          variant: "destructive",
         });
         return;
       }
 
       if (user) {
-        setUserEmail(user.email || '');
+        setUserEmail(user.email || "");
 
-        const [{ data: profile }, { data: adminFlag }, { data: superAdminFlag }, { data: coordinatorFlag }] = await Promise.all([
-          supabase.from('users').select('first_name, last_name').eq('id', user.id).maybeSingle(),
-          supabase.rpc('is_admin_or_super_admin', { _user_id: user.id }),
-          supabase.rpc('is_user_role', { _user_id: user.id, _role: 'SUPER_ADMIN' }),
-          supabase.rpc('is_coordenador_or_above', { _user_id: user.id }),
-        ]);
+        const [{ data: profile }, { data: adminFlag }, { data: superAdminFlag }, { data: coordinatorFlag }] =
+          await Promise.all([
+            supabase.from("users").select("first_name, last_name").eq("id", user.id).maybeSingle(),
+            supabase.rpc("is_admin_or_super_admin", { _user_id: user.id }),
+            supabase.rpc("is_user_role", { _user_id: user.id, _role: "SUPER_ADMIN" }),
+            supabase.rpc("is_coordenador_or_above", { _user_id: user.id }),
+          ]);
 
         setIsAdmin(!!adminFlag);
         setIsSuperAdmin(!!superAdminFlag);
         setIsCoordinator(!!coordinatorFlag);
 
         if (profile) {
-          setUserName(`${profile.first_name || ''} ${profile.last_name || ''}`.trim() || user.email || '');
+          setUserName(`${profile.first_name || ""} ${profile.last_name || ""}`.trim() || user.email || "");
         } else {
-          setUserName(user.email || '');
+          setUserName(user.email || "");
         }
       }
     };
+
     loadUser();
   }, [t, toast]);
 
@@ -81,77 +73,77 @@ const Dashboard = () => {
 
     if (error) {
       toast({
-        title: t('error'),
-        description: `${t('logoutFailed')}: ${error.message}`,
-        variant: 'destructive',
+        title: t("error"),
+        description: `${t("logoutFailed")}: ${error.message}`,
+        variant: "destructive",
       });
       return;
     }
 
-    navigate('/login');
+    navigate("/login");
   };
 
   const dashboardButtons: DashboardBtn[] = useMemo(() => {
     const base: DashboardBtn[] = [
       {
         icon: ClipboardList,
-        label: t('activityRecord'),
-        path: '/activity',
-        variant: 'default',
+        label: t("activityRecord"),
+        path: "/activity",
+        variant: "default",
       },
       {
         icon: Wrench,
-        label: t('maintenance'),
-        path: '/maintenance',
-        variant: 'secondary',
+        label: t("maintenance"),
+        path: "/maintenance",
+        variant: "secondary",
       },
       {
         icon: AlertTriangle,
-        label: t('damages'),
-        path: '/damages',
-        variant: 'destructive',
+        label: t("damages"),
+        path: "/damages",
+        variant: "destructive",
       },
       {
         icon: Fuel,
-        label: t('fuel'),
-        path: '/fuel',
-        variant: 'secondary',
+        label: t("fuel"),
+        path: "/fuel",
+        variant: "secondary",
       },
       {
         icon: Package,
-        label: t('orders'),
-        path: '/orders',
-        variant: 'secondary',
+        label: t("orders"),
+        path: "/orders",
+        variant: "secondary",
       },
       {
         icon: Headset,
-        label: t('support'),
-        path: '/support',
-        variant: 'secondary',
+        label: t("support"),
+        path: "/support",
+        variant: "secondary",
       },
       {
         icon: ClipboardList,
-        label: t('myDocuments'),
-        path: '/my-documents',
-        variant: 'outline',
+        label: t("myDocuments"),
+        path: "/my-documents",
+        variant: "outline",
       },
     ];
 
     if (isCoordinator) {
       base.unshift({
         icon: ShieldCheck,
-        label: t('approvals'),
-        path: '/admin/approvals',
-        variant: 'outline',
+        label: t("approvals"),
+        path: "/admin/approvals",
+        variant: "outline",
       });
     }
 
     if (isAdmin) {
       base.unshift({
         icon: ShieldCheck,
-        label: t('adminValidation'),
-        path: '/admin/activities',
-        variant: 'outline',
+        label: t("adminValidation"),
+        path: "/admin/activities",
+        variant: "outline",
       });
     }
 
@@ -160,75 +152,21 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-4">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold">{t('appTitle')}</h1>
-            <p className="text-sm text-muted-foreground truncate">
-              {t('welcomeBack')}{userName ? `, ${userName}` : ''}
-            </p>
-            {!!userEmail && (
-              <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
-            )}
-          </div>
+      <DashboardHeader
+        userName={userName}
+        userEmail={userEmail}
+        isAdmin={isAdmin}
+        isSuperAdmin={isSuperAdmin}
+        onNavigate={(path) => navigate(path)}
+        onLogout={handleLogout}
+      />
 
-          <div className="flex items-center gap-2 shrink-0">
-            {isSuperAdmin && (
-              <>
-                <Button variant="outline" onClick={() => navigate('/admin/dashboard')}>
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="ml-2 hidden sm:inline">Dashboard</span>
-                </Button>
-                <Button variant="outline" onClick={() => navigate('/admin/machines')}>
-                  <Cog className="h-5 w-5" />
-                  <span className="ml-2 hidden sm:inline">Máquinas</span>
-                </Button>
-                <Button variant="outline" onClick={() => navigate('/admin/users')}>
-                  <ShieldCheck className="h-5 w-5" />
-                  <span className="ml-2 hidden sm:inline">{t('userManagement')}</span>
-                </Button>
-              </>
-            )}
-
-            {isAdmin && (
-              <Button variant="outline" onClick={() => navigate('/admin/master-data')}>
-                <Database className="h-5 w-5" />
-                <span className="ml-2 hidden sm:inline">Cadastros</span>
-              </Button>
-            )}
-
-            <Button variant="ghost" onClick={handleLogout}>
-              <LogOut className="h-5 w-5" />
-              <span className="ml-2">{t('logout')}</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-          {dashboardButtons.map((button) => {
-            const Icon = button.icon;
-            return (
-              <Card
-                key={button.path}
-                className="p-0 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
-                onClick={() => navigate(button.path)}
-              >
-                <Button
-                  variant={button.variant}
-                  className="w-full h-32 flex flex-col items-center justify-center gap-3 rounded-none text-lg font-semibold"
-                >
-                  <Icon className="h-10 w-10" />
-                  {button.label}
-                </Button>
-              </Card>
-            );
-          })}
-        </div>
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <DashboardGrid items={dashboardButtons} onNavigate={(path) => navigate(path)} />
       </main>
     </div>
   );
 };
 
 export default Dashboard;
+

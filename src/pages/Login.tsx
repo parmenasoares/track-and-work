@@ -102,104 +102,115 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">{isLogin ? t('login') : t('signup')}</h1>
-          <p className="text-muted-foreground">Fleet Control System</p>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-6">
+      <div className="w-full max-w-md">
+        <div className="mb-4 text-center">
+          <p className="text-xs font-semibold tracking-wide text-muted-foreground">RYROX RENTAL</p>
+          <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
+            {isLogin ? t("login") : t("signup")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Controlo de máquinas e herdade — rápido, rastreável, mobile-first.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="firstName">{t('firstName')}</Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  required={!isLogin}
-                />
+        <Card className="p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">{t("firstName")}</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    required={!isLogin}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">{t("lastName")}</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    required={!isLogin}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">{t('lastName')}</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  required={!isLogin}
-                />
-              </div>
-            </>
-          )}
+            )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">{t('email')}</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">{t('password')}</Label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-            />
-          </div>
-
-          {!isLogin && (
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <Input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                id="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
             </div>
-          )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isLogin ? t('login') : t('signup')}
-          </Button>
-        </form>
+            <div className="space-y-2">
+              <Label htmlFor="password">{t("password")}</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete={isLogin ? "current-password" : "new-password"}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+              />
+            </div>
 
-        <div className="mt-4 text-center text-sm">
-          {isLogin ? (
-            <p>
-              {t('dontHaveAccount')}{' '}
-              <button
-                type="button"
-                onClick={() => setIsLogin(false)}
-                className="text-primary hover:underline font-semibold"
-              >
-                {t('signUpHere')}
-              </button>
-            </p>
-          ) : (
-            <p>
-              {t('alreadyHaveAccount')}{' '}
-              <button
-                type="button"
-                onClick={() => setIsLogin(true)}
-                className="text-primary hover:underline font-semibold"
-              >
-                {t('signInHere')}
-              </button>
-            </p>
-          )}
-        </div>
-      </Card>
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  required
+                />
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLogin ? t("login") : t("signup")}
+            </Button>
+          </form>
+
+          <div className="mt-5 text-center text-sm">
+            {isLogin ? (
+              <p>
+                {t("dontHaveAccount")} {" "}
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(false)}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  {t("signUpHere")}
+                </button>
+              </p>
+            ) : (
+              <p>
+                {t("alreadyHaveAccount")} {" "}
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(true)}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  {t("signInHere")}
+                </button>
+              </p>
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };
