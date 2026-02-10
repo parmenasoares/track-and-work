@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { getPublicErrorMessage } from "@/lib/publicErrors";
 import { Loader2 } from "lucide-react";
+import logoAgroX from "@/assets/agro-x-logo.png";
+
 
 const Login = () => {
   const { t } = useLanguage();
@@ -110,7 +112,16 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="mb-4 text-center">
-          <p className="text-xs font-semibold tracking-wide text-muted-foreground">RYROX RENTAL CONTROL</p>
+          <img
+            src={logoAgroX}
+            alt="AGRO-X CONTROL"
+            className="mx-auto h-10 w-auto"
+            loading="eager"
+            decoding="async"
+          />
+          <p className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground">
+            AGRO-X CONTROL
+          </p>
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
             {isLogin ? t("login") : t("signup")}
           </h1>
