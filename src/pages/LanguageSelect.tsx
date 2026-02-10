@@ -29,7 +29,7 @@ const LanguageSelect = () => {
 
         <div className="space-y-3">
           <Button variant="outline" size="lg" className="w-full h-16 text-lg font-semibold" onClick={() => handleLanguageSelect('pt')}>
-            🇧🇷 Português
+            🇵🇹 Português (Portugal)
           </Button>
           <Button variant="outline" size="lg" className="w-full h-16 text-lg font-semibold" onClick={() => handleLanguageSelect('en')}>
             🇺🇸 English

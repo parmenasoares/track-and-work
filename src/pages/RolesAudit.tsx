@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BrandMark } from "@/components/BrandMark";
 import {
   Table,
   TableBody,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/table";
 
 import { ArrowLeft, RefreshCw, ShieldCheck } from "lucide-react";
+
 
 type RoleAuditRow = {
   id: string;
@@ -84,23 +86,17 @@ const RolesAudit = () => {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <BrandMark />
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5" />
                 {t("roleAuditTitle")}
               </h1>
-              <p className="text-sm text-muted-foreground">
-                {t("roleAuditDescription")}
-              </p>
+              <p className="text-sm text-muted-foreground">{t("roleAuditDescription")}</p>
             </div>
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
+          <Button type="button" variant="outline" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={"mr-2 h-4 w-4" + (isFetching ? " animate-spin" : "")} />
             {t("refresh")}
           </Button>

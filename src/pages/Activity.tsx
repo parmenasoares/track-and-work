@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { BrandMark } from "@/components/BrandMark";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Camera, Loader2, MapPin, Upload } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+
 
 type ClientRow = { id: string; name: string };
 type LocationRow = { id: string; name: string; client_id: string };
@@ -372,6 +374,7 @@ const Activity = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}> 
             <ArrowLeft className="h-5 w-5" />
           </Button>
+          <BrandMark />
           <h1 className="text-2xl font-bold">{step === "start" ? t("startActivity") : t("endActivity")}</h1>
         </div>
       </header>

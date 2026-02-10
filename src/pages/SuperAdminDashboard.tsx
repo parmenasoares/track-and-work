@@ -2,10 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
+import { BrandMark } from "@/components/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Activity, Users, Cog, ClipboardList, TrendingUp } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+
 
 const COLORS = {
   primary: "hsl(var(--primary))",
@@ -115,6 +117,7 @@ const SuperAdminDashboard = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
+          <BrandMark />
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <TrendingUp className="h-6 w-6" />

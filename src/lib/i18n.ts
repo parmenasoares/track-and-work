@@ -7,16 +7,16 @@ export const translations = {
     // Auth
     login: 'Entrar',
     signup: 'Criar conta',
-    email: 'E-mail',
-    password: 'Senha',
+    email: 'Email',
+    password: 'Palavra-passe',
     firstName: 'Nome',
-    lastName: 'Sobrenome',
-    confirmPassword: 'Confirmar senha',
-    forgotPassword: 'Esqueceu a senha?',
+    lastName: 'Apelido',
+    confirmPassword: 'Confirmar palavra-passe',
+    forgotPassword: 'Esqueceu a palavra-passe?',
     dontHaveAccount: 'Não tem conta?',
     alreadyHaveAccount: 'Já tem conta?',
     signInHere: 'Entre aqui',
-    signUpHere: 'Cadastre-se aqui',
+    signUpHere: 'Registe-se aqui',
     
     // Dashboard
     appTitle: 'AGRO-X CONTROL',
@@ -101,20 +101,20 @@ export const translations = {
     noRoleChanges: 'Nenhuma alteração de permissões encontrada.',
 
     startActivity: 'Iniciar Atividade',
-    endActivity: 'Finalizar Atividade',
+    endActivity: 'Terminar Atividade',
     selectMachine: 'Selecionar Máquina',
-    odometer: 'Hodômetro',
+    odometer: 'Odómetro',
     takeSelfie: 'Tirar Selfie',
     location: 'Localização',
     notes: 'Observações',
-    register: 'Registrar',
-    finish: 'Finalizar',
+    register: 'Registar',
+    finish: 'Terminar',
 
     // Admin validation
     pendingActivities: 'Atividades pendentes de validação',
     activities: 'Atividades',
     pending: 'pendentes',
-    status: 'Status',
+    status: 'Estado',
     machine: 'Máquina',
     operator: 'Operador',
     startTime: 'Início',
@@ -134,7 +134,7 @@ export const translations = {
 
     // Common
     logout: 'Sair',
-    loading: 'Carregando...',
+    loading: 'A carregar...',
     error: 'Erro',
     success: 'Sucesso',
     cancel: 'Cancelar',

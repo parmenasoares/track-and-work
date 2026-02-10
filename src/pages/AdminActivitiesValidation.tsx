@@ -5,11 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
 import ActivityPhotosDialog from "@/components/ActivityPhotosDialog";
+import { BrandMark } from "@/components/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, CheckCircle2, Image as ImageIcon, RefreshCcw, ShieldCheck, XCircle } from "lucide-react";
+
 
 type ActivityRow = {
   id: string;
@@ -216,6 +218,7 @@ const AdminActivitiesValidation = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}> 
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <BrandMark />
             <div>
               <h1 className="text-2xl font-bold">{t("adminValidation")}</h1>
               <p className="text-sm text-muted-foreground">{t("pendingActivities")}</p>

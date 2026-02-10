@@ -11,8 +11,10 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { BrandMark } from "@/components/BrandMark";
 
 import { ArrowLeft, ExternalLink, Loader2, ThumbsDown, ThumbsUp } from "lucide-react";
+
 
 type DocType = (typeof Constants.public.Enums.document_type)[number];
 
@@ -216,6 +218,7 @@ const AdminApprovals = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="Back to dashboard">
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <BrandMark />
             <div>
               <h1 className="text-2xl font-bold">{t("approvals")}</h1>
               <p className="text-sm text-muted-foreground">{t("approvalsDesc")}</p>
