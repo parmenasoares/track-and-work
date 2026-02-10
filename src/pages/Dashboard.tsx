@@ -12,10 +12,28 @@ import {
   Package,
   Headset,
   ShieldCheck,
+  Timer,
 } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardGrid, { type DashboardBtn } from "@/components/dashboard/DashboardGrid";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+type OpenActivityRow = {
+  id: string;
+  start_time: string;
+  end_time: string | null;
+  status: string;
+};
+
+function formatElapsed(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -28,6 +46,8 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isCoordinator, setIsCoordinator] = useState(false);
+
+  const [elapsedMs, setElapsedMs] = useState(0);
 
   const { data: startedTodayCount } = useQuery({
     queryKey: ["activities-started-today", userId],
@@ -46,6 +66,43 @@ const Dashboard = () => {
       return count ?? 0;
     },
   });
+
+  const { data: openActivity } = useQuery({
+    queryKey: ["open-activity", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("activities")
+        .select("id, start_time, end_time, status")
+        .eq("operator_id", userId!)
+        .is("end_time", null)
+        .eq("status", "PENDING_VALIDATION")
+        .order("start_time", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      return (data ?? null) as OpenActivityRow | null;
+    },
+    staleTime: 5_000,
+  });
+
+  useEffect(() => {
+    if (!openActivity?.start_time) return;
+
+    const tick = () => {
+      const start = new Date(openActivity.start_time).getTime();
+      setElapsedMs(Date.now() - start);
+    };
+
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [openActivity?.start_time]);
+
+  useEffect(() => {
+    if (!openActivity) setElapsedMs(0);
+  }, [openActivity]);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -184,6 +241,21 @@ const Dashboard = () => {
       />
 
       <main className="container mx-auto px-4 py-6 sm:py-8 space-y-4">
+        {openActivity && (
+          <Card className="p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Timer className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Atividade em andamento</p>
+                  <p className="text-xs text-muted-foreground">Cronómetro: {formatElapsed(elapsedMs)}</p>
+                </div>
+              </div>
+              <Button variant="outline" onClick={() => navigate("/activity/close")}>Fechar atividade</Button>
+            </div>
+          </Card>
+        )}
+
         <Card className="p-4">
           <div className="flex items-baseline justify-between gap-4">
             <p className="text-sm font-medium text-muted-foreground">{t("activitiesStartedToday")}</p>
