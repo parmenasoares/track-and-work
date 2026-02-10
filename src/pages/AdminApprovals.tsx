@@ -30,9 +30,9 @@ type UserRow = {
 };
 
 type ComplianceRow = {
-  nif: string | null;
-  niss: string | null;
-  iban: string | null;
+  nif_last4: string | null;
+  niss_last4: string | null;
+  iban_last4: string | null;
   address_line1: string | null;
   address_line2: string | null;
   city: string | null;
@@ -104,7 +104,7 @@ const AdminApprovals = () => {
         supabase.from("users").select("id,email,first_name,last_name").eq("id", uid).maybeSingle(),
         supabase
           .from("user_compliance")
-          .select("nif,niss,iban,address_line1,address_line2,city,postal_code,country")
+          .select("nif_last4,niss_last4,iban_last4,address_line1,address_line2,city,postal_code,country")
           .eq("user_id", uid)
           .maybeSingle(),
         supabase.from("user_document_files").select("doc_type,storage_path,file_name,created_at").eq("user_id", uid),
@@ -280,15 +280,15 @@ const AdminApprovals = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                     <div>
                       <p className="text-xs text-muted-foreground">NIF</p>
-                      <p className="text-sm font-medium">{compliance?.nif ?? "-"}</p>
+                      <p className="text-sm font-medium">{compliance?.nif_last4 ? `••••${compliance.nif_last4}` : "-"}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">NISS</p>
-                      <p className="text-sm font-medium">{compliance?.niss ?? "-"}</p>
+                      <p className="text-sm font-medium">{compliance?.niss_last4 ? `••••${compliance.niss_last4}` : "-"}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">IBAN</p>
-                      <p className="text-sm font-medium">{compliance?.iban ?? "-"}</p>
+                      <p className="text-sm font-medium">{compliance?.iban_last4 ? `••••${compliance.iban_last4}` : "-"}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">{t("country")}</p>
