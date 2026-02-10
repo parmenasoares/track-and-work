@@ -58,10 +58,18 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
-const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
+const DEFAULT_CHART_PALETTE = [
+  "hsl(var(--primary))",
+  "hsl(var(--accent))",
+  "hsl(var(--success))",
+  "hsl(var(--warning))",
+  "hsl(var(--secondary))",
+] as const;
 
-  if (!colorConfig.length) {
+const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+  const entries = Object.entries(config);
+
+  if (!entries.length) {
     return null;
   }
 
@@ -72,10 +80,14 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
           .map(
             ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+${entries
+  .map(([key, itemConfig], index) => {
+    const color =
+      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+      itemConfig.color ||
+      DEFAULT_CHART_PALETTE[index % DEFAULT_CHART_PALETTE.length];
+
+    return `  --color-${key}: ${color};`;
   })
   .join("\n")}
 }
