@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
@@ -39,6 +39,17 @@ const App = () => (
           <Routes>
             <Route path="/" element={<LanguageSelect />} />
             <Route path="/login" element={<Login />} />
+
+            {/* Coordinator entry route (avoid 404 when users bookmark /coordinator) */}
+            <Route
+              path="/coordinator"
+              element={
+                <CoordinatorRoute>
+                  <Navigate to="/admin/approvals" replace />
+                </CoordinatorRoute>
+              }
+            />
+
             <Route
               path="/dashboard"
               element={
@@ -159,6 +170,7 @@ const App = () => (
                 </SuperAdminRoute>
               }
             />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
