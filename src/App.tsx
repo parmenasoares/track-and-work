@@ -18,6 +18,7 @@ import Orders from "./pages/Orders";
 import Support from "./pages/Support";
 import AdminActivitiesValidation from "./pages/AdminActivitiesValidation";
 import AdminUsers from "./pages/AdminUsers";
+import RolesAudit from "./pages/RolesAudit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -101,6 +102,14 @@ const App = () => (
               element={
                 <SuperAdminRoute>
                   <AdminUsers />
+                </SuperAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/roles-audit"
+              element={
+                <SuperAdminRoute>
+                  <RolesAudit />
                 </SuperAdminRoute>
               }
             />
