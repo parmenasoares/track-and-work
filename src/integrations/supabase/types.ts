@@ -85,27 +85,39 @@ export type Database = {
       }
       machines: {
         Row: {
+          brand: string | null
           created_at: string
           id: string
+          internal_id: string | null
           model: string | null
           name: string
+          plate: string | null
           serial_number: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
+          brand?: string | null
           created_at?: string
           id?: string
+          internal_id?: string | null
           model?: string | null
           name: string
+          plate?: string | null
           serial_number?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
+          brand?: string | null
           created_at?: string
           id?: string
+          internal_id?: string | null
           model?: string | null
           name?: string
+          plate?: string | null
           serial_number?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []

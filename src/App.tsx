@@ -18,6 +18,7 @@ import Orders from "./pages/Orders";
 import Support from "./pages/Support";
 import AdminActivitiesValidation from "./pages/AdminActivitiesValidation";
 import AdminUsers from "./pages/AdminUsers";
+import AdminMachines from "./pages/AdminMachines";
 import RolesAudit from "./pages/RolesAudit";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -119,6 +120,14 @@ const App = () => (
               element={
                 <SuperAdminRoute>
                   <SuperAdminDashboard />
+                </SuperAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/machines"
+              element={
+                <SuperAdminRoute>
+                  <AdminMachines />
                 </SuperAdminRoute>
               }
             />

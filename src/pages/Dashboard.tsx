@@ -15,6 +15,7 @@ import {
   LogOut,
   ShieldCheck,
   TrendingUp,
+  Cog,
 } from 'lucide-react';
 
 type DashboardBtn = {
@@ -158,6 +159,10 @@ const Dashboard = () => {
                 <Button variant="outline" onClick={() => navigate('/admin/dashboard')}>
                   <TrendingUp className="h-5 w-5" />
                   <span className="ml-2 hidden sm:inline">Dashboard</span>
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/admin/machines')}>
+                  <Cog className="h-5 w-5" />
+                  <span className="ml-2 hidden sm:inline">Máquinas</span>
                 </Button>
                 <Button variant="outline" onClick={() => navigate('/admin/users')}>
                   <ShieldCheck className="h-5 w-5" />
