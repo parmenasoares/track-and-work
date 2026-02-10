@@ -17,9 +17,9 @@ import { ArrowLeft, FileUp, Loader2, Trash2 } from "lucide-react";
 type DocType = (typeof Constants.public.Enums.document_type)[number];
 
 type ComplianceRow = {
-  nif: string | null;
-  niss: string | null;
-  iban: string | null;
+  nif_last4: string | null;
+  niss_last4: string | null;
+  iban_last4: string | null;
   address_line1: string | null;
   address_line2: string | null;
   city: string | null;
@@ -62,14 +62,21 @@ const MyDocuments = () => {
 
   const [userId, setUserId] = useState<string | null>(null);
   const [compliance, setCompliance] = useState<ComplianceRow>({
-    nif: null,
-    niss: null,
-    iban: null,
+    nif_last4: null,
+    niss_last4: null,
+    iban_last4: null,
     address_line1: null,
     address_line2: null,
     city: null,
     postal_code: null,
     country: null,
+  });
+
+  // Sensitive fields are never read back from the database (only entered and encrypted on save)
+  const [pii, setPii] = useState<{ nif: string; niss: string; iban: string }>({
+    nif: "",
+    niss: "",
+    iban: "",
   });
   const [verification, setVerification] = useState<VerificationRow | null>(null);
   const [docs, setDocs] = useState<Record<string, DocumentFileRow>>({});
@@ -82,7 +89,11 @@ const MyDocuments = () => {
 
   const reload = async (uid: string) => {
     const [complianceRes, verificationRes, docsRes] = await Promise.all([
-      supabase.from("user_compliance").select("nif,niss,iban,address_line1,address_line2,city,postal_code,country").eq("user_id", uid).maybeSingle(),
+      supabase
+        .from("user_compliance")
+        .select("nif_last4,niss_last4,iban_last4,address_line1,address_line2,city,postal_code,country")
+        .eq("user_id", uid)
+        .maybeSingle(),
       supabase.from("user_verifications").select("status,submitted_at,reviewed_at,review_notes").eq("user_id", uid).maybeSingle(),
       supabase.from("user_document_files").select("doc_type,storage_path,file_name,mime_type,size_bytes,created_at").eq("user_id", uid),
     ]);
@@ -155,22 +166,23 @@ const MyDocuments = () => {
     if (!userId || saving) return;
     setSaving(true);
     try {
-      const payload = {
-        user_id: userId,
-        nif: compliance.nif?.trim() || null,
-        niss: compliance.niss?.trim() || null,
-        iban: compliance.iban?.trim() || null,
-        address_line1: compliance.address_line1?.trim() || null,
-        address_line2: compliance.address_line2?.trim() || null,
-        city: compliance.city?.trim() || null,
-        postal_code: compliance.postal_code?.trim() || null,
-        country: compliance.country?.trim() || null,
-      };
-
-      const { error } = await supabase.from("user_compliance").upsert(payload, { onConflict: "user_id" });
+      // Save PII via backend function (encrypted at rest)
+      const { error } = await supabase.functions.invoke("compliance-upsert", {
+        body: {
+          nif: pii.nif,
+          niss: pii.niss,
+          iban: pii.iban,
+          address_line1: compliance.address_line1,
+          address_line2: compliance.address_line2,
+          city: compliance.city,
+          postal_code: compliance.postal_code,
+          country: compliance.country,
+        },
+      });
       if (error) throw error;
 
       toast({ title: t("success"), description: t("saved") });
+      setPii({ nif: "", niss: "", iban: "" });
       await reload(userId);
     } catch (err: any) {
       console.error(err);
@@ -324,19 +336,34 @@ const MyDocuments = () => {
 
           <Separator className="my-5" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nif">NIF</Label>
-              <Input id="nif" value={compliance.nif ?? ""} onChange={(e) => setCompliance((p) => ({ ...p, nif: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="niss">NISS</Label>
-              <Input id="niss" value={compliance.niss ?? ""} onChange={(e) => setCompliance((p) => ({ ...p, niss: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="iban">IBAN</Label>
-              <Input id="iban" value={compliance.iban ?? ""} onChange={(e) => setCompliance((p) => ({ ...p, iban: e.target.value }))} />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nif">NIF</Label>
+                <Input
+                  id="nif"
+                  value={pii.nif}
+                  placeholder={compliance.nif_last4 ? `••••${compliance.nif_last4}` : ""}
+                  onChange={(e) => setPii((p) => ({ ...p, nif: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="niss">NISS</Label>
+                <Input
+                  id="niss"
+                  value={pii.niss}
+                  placeholder={compliance.niss_last4 ? `••••${compliance.niss_last4}` : ""}
+                  onChange={(e) => setPii((p) => ({ ...p, niss: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="iban">IBAN</Label>
+                <Input
+                  id="iban"
+                  value={pii.iban}
+                  placeholder={compliance.iban_last4 ? `••••${compliance.iban_last4}` : ""}
+                  onChange={(e) => setPii((p) => ({ ...p, iban: e.target.value }))}
+                />
+              </div>
             <div className="space-y-2">
               <Label htmlFor="country">{t("country")}</Label>
               <Input id="country" value={compliance.country ?? ""} onChange={(e) => setCompliance((p) => ({ ...p, country: e.target.value }))} />

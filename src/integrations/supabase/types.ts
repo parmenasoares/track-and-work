@@ -252,8 +252,14 @@ export type Database = {
           country: string | null
           created_at: string
           iban: string | null
+          iban_enc: string | null
+          iban_last4: string | null
           nif: string | null
+          nif_enc: string | null
+          nif_last4: string | null
           niss: string | null
+          niss_enc: string | null
+          niss_last4: string | null
           postal_code: string | null
           updated_at: string
           user_id: string
@@ -265,8 +271,14 @@ export type Database = {
           country?: string | null
           created_at?: string
           iban?: string | null
+          iban_enc?: string | null
+          iban_last4?: string | null
           nif?: string | null
+          nif_enc?: string | null
+          nif_last4?: string | null
           niss?: string | null
+          niss_enc?: string | null
+          niss_last4?: string | null
           postal_code?: string | null
           updated_at?: string
           user_id: string
@@ -278,8 +290,14 @@ export type Database = {
           country?: string | null
           created_at?: string
           iban?: string | null
+          iban_enc?: string | null
+          iban_last4?: string | null
           nif?: string | null
+          nif_enc?: string | null
+          nif_last4?: string | null
           niss?: string | null
+          niss_enc?: string | null
+          niss_last4?: string | null
           postal_code?: string | null
           updated_at?: string
           user_id?: string
