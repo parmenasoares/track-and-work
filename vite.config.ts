@@ -19,9 +19,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
-        name: 'Fleet Control - Gestão de Frotas',
-        short_name: 'Fleet Control',
-        description: 'Sistema de gestão de frotas e controle de atividades',
+        name: 'AGRO-X CONTROL',
+        short_name: 'AGRO-X',
+        description: 'Sistema de controlo e rastreio de máquinas e atividades',
         theme_color: '#1e73be',
         background_color: '#f8f9fa',
         display: 'standalone',
