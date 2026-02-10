@@ -138,25 +138,63 @@ const Activity = () => {
   const startCamera = async (target: "selfie" | "odometer") => {
     try {
       setCaptureTarget(target);
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("camera_not_supported");
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: target === "selfie" ? "user" : "environment",
         },
         audio: false,
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        // iOS Safari: improves reliability
-        videoRef.current.playsInline = true;
-        videoRef.current.muted = true;
-        await videoRef.current.play().catch(() => undefined);
-        setCameraActive(true);
+
+      if (!videoRef.current) {
+        // Safety: if ref is missing, stop tracks immediately.
+        stream.getTracks().forEach((t) => t.stop());
+        throw new Error("camera_video_ref_missing");
       }
+
+      const video = videoRef.current;
+      video.srcObject = stream;
+      // iOS Safari: improves reliability
+      video.playsInline = true;
+      video.muted = true;
+
+      // Avoid hanging forever on some mobile browsers where play() never resolves.
+      const waitForMetadata = new Promise<void>((resolve) => {
+        if (video.readyState >= 1) return resolve();
+        const onLoaded = () => {
+          video.removeEventListener("loadedmetadata", onLoaded);
+          resolve();
+        };
+        video.addEventListener("loadedmetadata", onLoaded);
+      });
+
+      const withTimeout = <T,>(p: Promise<T>, ms: number) =>
+        Promise.race([
+          p,
+          new Promise<T>((_, reject) => setTimeout(() => reject(new Error("camera_timeout")), ms)),
+        ]);
+
+      await withTimeout(waitForMetadata, 1500);
+
+      // Try to start playback, but never block UI if it stalls.
+      await withTimeout(video.play().catch(() => undefined), 1500).catch(() => undefined);
+
+      setCameraActive(true);
     } catch (err: any) {
-      const msg = `${err?.name ?? "CameraError"}: ${err?.message ?? "Camera access denied"}`;
+      // Ensure we don't leave a half-open stream.
+      const stream = videoRef.current?.srcObject as MediaStream | null;
+      stream?.getTracks().forEach((track) => track.stop());
+      if (videoRef.current) videoRef.current.srcObject = null;
+      setCameraActive(false);
+
+      const msg = `${err?.name ?? "CameraError"}: ${err?.message ?? "Camera access failed"}`;
       toast({
         title: t("error"),
-        description: msg,
+        description: `${msg}. Se continuar, use “Enviar foto”.`,
         variant: "destructive",
       });
     }
