@@ -126,7 +126,7 @@ const Login = () => {
             {isLogin ? t("login") : t("signup")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Controlo de máquinas e herdade — rápido, rastreável, mobile-first.
+            {t("appTagline")}
           </p>
         </div>
 
