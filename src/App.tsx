@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/hooks/useLanguage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import SuperAdminRoute from "@/components/SuperAdminRoute";
+import CoordinatorRoute from "@/components/CoordinatorRoute";
 import LanguageSelect from "./pages/LanguageSelect";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -16,6 +17,8 @@ import Damages from "./pages/Damages";
 import Fuel from "./pages/Fuel";
 import Orders from "./pages/Orders";
 import Support from "./pages/Support";
+import MyDocuments from "./pages/MyDocuments";
+import AdminApprovals from "./pages/AdminApprovals";
 import AdminActivitiesValidation from "./pages/AdminActivitiesValidation";
 import AdminUsers from "./pages/AdminUsers";
 import AdminMachines from "./pages/AdminMachines";
@@ -90,6 +93,22 @@ const App = () => (
                 <ProtectedRoute>
                   <Support />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-documents"
+              element={
+                <ProtectedRoute>
+                  <MyDocuments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/approvals"
+              element={
+                <CoordinatorRoute>
+                  <AdminApprovals />
+                </CoordinatorRoute>
               }
             />
             <Route
