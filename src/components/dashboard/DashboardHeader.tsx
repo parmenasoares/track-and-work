@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
+import logoAgroX from "@/assets/agro-x-logo.png";
 import {
   Cog,
   Database,
@@ -7,6 +8,7 @@ import {
   ShieldCheck,
   TrendingUp,
 } from "lucide-react";
+
 
 type Props = {
   userName: string;
@@ -31,12 +33,23 @@ const DashboardHeader = ({
     <header className="border-b bg-card sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold tracking-wide text-muted-foreground">
-            RYROX RENTAL CONTROL
-          </p>
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight">
-            {t("appTitle")}
-          </h1>
+          <div className="flex items-center gap-3">
+            <img
+              src={logoAgroX}
+              alt="AGRO-X CONTROL"
+              className="h-7 w-auto shrink-0"
+              loading="eager"
+              decoding="async"
+            />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground">
+                AGRO-X CONTROL
+              </p>
+              <h1 className="text-xl sm:text-2xl font-bold leading-tight">
+                {t("appTitle")}
+              </h1>
+            </div>
+          </div>
           <p className="text-sm text-muted-foreground truncate">
             {t("welcomeBack")}
             {userName ? `, ${userName}` : ""}
