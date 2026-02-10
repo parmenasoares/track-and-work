@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import {
   ClipboardList,
   Wrench,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardGrid, { type DashboardBtn } from "@/components/dashboard/DashboardGrid";
+import { Card } from "@/components/ui/card";
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -22,9 +24,28 @@ const Dashboard = () => {
 
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isCoordinator, setIsCoordinator] = useState(false);
+
+  const { data: startedTodayCount } = useQuery({
+    queryKey: ["activities-started-today", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const { count, error } = await supabase
+        .from("activities")
+        .select("id", { count: "exact", head: true })
+        .eq("operator_id", userId!)
+        .gte("start_time", startOfToday.toISOString());
+
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
 
   useEffect(() => {
     const loadUser = async () => {
@@ -43,6 +64,7 @@ const Dashboard = () => {
       }
 
       if (user) {
+        setUserId(user.id);
         setUserEmail(user.email || "");
 
         const [{ data: profile }, { data: adminFlag }, { data: superAdminFlag }, { data: coordinatorFlag }] =
@@ -161,7 +183,14 @@ const Dashboard = () => {
         onLogout={handleLogout}
       />
 
-      <main className="container mx-auto px-4 py-6 sm:py-8">
+      <main className="container mx-auto px-4 py-6 sm:py-8 space-y-4">
+        <Card className="p-4">
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="text-sm font-medium text-muted-foreground">{t("activitiesStartedToday")}</p>
+            <p className="text-3xl font-bold tabular-nums">{startedTodayCount ?? 0}</p>
+          </div>
+        </Card>
+
         <DashboardGrid items={dashboardButtons} onNavigate={(path) => navigate(path)} />
       </main>
     </div>
