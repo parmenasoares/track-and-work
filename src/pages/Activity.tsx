@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Camera, Loader2, MapPin } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, MapPin, Upload } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 type ClientRow = { id: string; name: string };
@@ -136,16 +136,24 @@ const Activity = () => {
     try {
       setCaptureTarget(target);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: target === "selfie" ? "user" : "environment" },
+        video: {
+          facingMode: target === "selfie" ? "user" : "environment",
+        },
+        audio: false,
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        // iOS Safari: improves reliability
+        videoRef.current.playsInline = true;
+        videoRef.current.muted = true;
+        await videoRef.current.play().catch(() => undefined);
         setCameraActive(true);
       }
-    } catch {
+    } catch (err: any) {
+      const msg = `${err?.name ?? "CameraError"}: ${err?.message ?? "Camera access denied"}`;
       toast({
         title: t("error"),
-        description: "Camera access denied",
+        description: msg,
         variant: "destructive",
       });
     }
@@ -171,19 +179,25 @@ const Activity = () => {
             setOdometerBlob(blob);
           }
         } catch {
-          if (captureTarget === "selfie") {
-            setSelfieBlob(null);
-          } else {
-            setOdometerBlob(null);
-          }
+          if (captureTarget === "selfie") setSelfieBlob(null);
+          else setOdometerBlob(null);
         }
 
         const stream = videoRef.current.srcObject as MediaStream;
         stream?.getTracks().forEach((track) => track.stop());
+        if (videoRef.current) videoRef.current.srcObject = null;
         setCameraActive(false);
       }
     }
   };
+
+  useEffect(() => {
+    return () => {
+      const stream = videoRef.current?.srcObject as MediaStream | null;
+      stream?.getTracks().forEach((t) => t.stop());
+      if (videoRef.current) videoRef.current.srcObject = null;
+    };
+  }, []);
 
   const validateEndStep = () => {
     if (!formData.performanceRating) {
@@ -526,13 +540,46 @@ const Activity = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Selfie (obrigatório)</Label>
-                {!cameraActive && !selfieData && (
-                  <Button type="button" variant="outline" className="w-full" onClick={() => startCamera("selfie")}
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => startCamera("selfie")}
+                    disabled={cameraActive}
                   >
                     <Camera className="mr-2 h-4 w-4" />
-                    {t("takeSelfie")}
+                    Abrir câmara
                   </Button>
-                )}
+
+                  <label className="w-full">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="user"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        e.currentTarget.value = "";
+                        if (!f) return;
+                        const dataUrl = await new Promise<string>((resolve, reject) => {
+                          const r = new FileReader();
+                          r.onload = () => resolve(String(r.result));
+                          r.onerror = () => reject(new Error("file_read_failed"));
+                          r.readAsDataURL(f);
+                        });
+                        setSelfieData(dataUrl);
+                        setSelfieBlob(f);
+                      }}
+                    />
+                    <Button type="button" variant="outline" className="w-full" disabled={cameraActive}>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Enviar foto
+                    </Button>
+                  </label>
+                </div>
+
                 {selfieData && (
                   <div className="space-y-2">
                     <img src={selfieData} alt="Selfie" className="w-full rounded-lg border" />
@@ -543,11 +590,10 @@ const Activity = () => {
                       onClick={() => {
                         setSelfieData(null);
                         setSelfieBlob(null);
-                        startCamera("selfie");
                       }}
                       disabled={cameraActive}
                     >
-                      Retake
+                      Remover
                     </Button>
                   </div>
                 )}
@@ -555,13 +601,46 @@ const Activity = () => {
 
               <div className="space-y-2">
                 <Label>Foto do hodômetro (obrigatório)</Label>
-                {!cameraActive && !odometerData && (
-                  <Button type="button" variant="outline" className="w-full" onClick={() => startCamera("odometer")}
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => startCamera("odometer")}
+                    disabled={cameraActive}
                   >
                     <Camera className="mr-2 h-4 w-4" />
-                    Tirar foto do hodômetro
+                    Abrir câmara
                   </Button>
-                )}
+
+                  <label className="w-full">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        e.currentTarget.value = "";
+                        if (!f) return;
+                        const dataUrl = await new Promise<string>((resolve, reject) => {
+                          const r = new FileReader();
+                          r.onload = () => resolve(String(r.result));
+                          r.onerror = () => reject(new Error("file_read_failed"));
+                          r.readAsDataURL(f);
+                        });
+                        setOdometerData(dataUrl);
+                        setOdometerBlob(f);
+                      }}
+                    />
+                    <Button type="button" variant="outline" className="w-full" disabled={cameraActive}>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Enviar foto
+                    </Button>
+                  </label>
+                </div>
+
                 {odometerData && (
                   <div className="space-y-2">
                     <img src={odometerData} alt="Foto do hodômetro" className="w-full rounded-lg border" />
@@ -572,11 +651,10 @@ const Activity = () => {
                       onClick={() => {
                         setOdometerData(null);
                         setOdometerBlob(null);
-                        startCamera("odometer");
                       }}
                       disabled={cameraActive}
                     >
-                      Retake
+                      Remover
                     </Button>
                   </div>
                 )}
@@ -584,7 +662,7 @@ const Activity = () => {
 
               {cameraActive && (
                 <div className="space-y-2">
-                  <video ref={videoRef} autoPlay className="w-full rounded-lg border" />
+                  <video ref={videoRef} autoPlay playsInline muted className="w-full rounded-lg border" />
                   <Button type="button" className="w-full" onClick={capturePhoto}>
                     Capture
                   </Button>
