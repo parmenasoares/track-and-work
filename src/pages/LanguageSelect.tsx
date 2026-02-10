@@ -18,7 +18,7 @@ const LanguageSelect = () => {
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
             <MapPin className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">​RYROX CONTROL </h1>
+          <h1 className="text-3xl font-bold tracking-tight">AGRO-X </h1>
           <p className="text-muted-foreground">Select your language / Selecione o idioma</p>
         </div>
 
