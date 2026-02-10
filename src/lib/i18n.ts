@@ -20,6 +20,7 @@ export const translations = {
     
     // Dashboard
     appTitle: 'AGRO-X CONTROL',
+    appTagline: 'Controlo operacional no terreno — rápido, rastreável e mobile-first.',
     welcomeBack: 'Bem-vindo',
     dashboard: 'Painel',
     activityRecord: 'Registro de Atividade',
@@ -165,6 +166,7 @@ export const translations = {
     
     // Dashboard
     appTitle: 'AGRO-X CONTROL',
+    appTagline: 'Operational field control — fast, traceable, mobile-first.',
     welcomeBack: 'Welcome back',
     dashboard: 'Dashboard',
     activityRecord: 'Activity Record',
