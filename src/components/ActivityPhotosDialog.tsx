@@ -17,6 +17,8 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   startPhotoPath: string | null;
   endPhotoPath: string | null;
+  startOdometerPhotoPath: string | null;
+  endOdometerPhotoPath: string | null;
   title?: string;
 };
 
@@ -35,22 +37,33 @@ export default function ActivityPhotosDialog({
   onOpenChange,
   startPhotoPath,
   endPhotoPath,
+  startOdometerPhotoPath,
+  endOdometerPhotoPath,
   title = "Fotos da atividade",
 }: Props) {
-  const enabled = open && (!!startPhotoPath || !!endPhotoPath);
+  const enabled =
+    open && (!!startPhotoPath || !!endPhotoPath || !!startOdometerPhotoPath || !!endOdometerPhotoPath);
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["activity-photo-signed-urls", startPhotoPath, endPhotoPath],
+    queryKey: [
+      "activity-photo-signed-urls",
+      startPhotoPath,
+      endPhotoPath,
+      startOdometerPhotoPath,
+      endOdometerPhotoPath,
+    ],
     enabled,
     staleTime: 0,
     gcTime: 0,
     queryFn: async () => {
-      const [startUrl, endUrl] = await Promise.all([
+      const [startUrl, endUrl, startOdoUrl, endOdoUrl] = await Promise.all([
         startPhotoPath ? createSignedUrl(startPhotoPath, 60) : Promise.resolve(null),
         endPhotoPath ? createSignedUrl(endPhotoPath, 60) : Promise.resolve(null),
+        startOdometerPhotoPath ? createSignedUrl(startOdometerPhotoPath, 60) : Promise.resolve(null),
+        endOdometerPhotoPath ? createSignedUrl(endOdometerPhotoPath, 60) : Promise.resolve(null),
       ]);
 
-      return { startUrl, endUrl };
+      return { startUrl, endUrl, startOdoUrl, endOdoUrl };
     },
   });
 
@@ -79,20 +92,38 @@ export default function ActivityPhotosDialog({
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <div className="text-sm font-medium">Início</div>
+              <div className="text-sm font-medium">Selfie — Início</div>
               {data?.startUrl ? (
-                <img src={data.startUrl} alt="Foto de início" className="w-full rounded-lg border object-contain" />
+                <img src={data.startUrl} alt="Selfie de início" className="w-full rounded-lg border object-contain" />
               ) : (
-                <div className="rounded-lg border p-6 text-sm text-muted-foreground">Sem foto de início</div>
+                <div className="rounded-lg border p-6 text-sm text-muted-foreground">Sem selfie de início</div>
               )}
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">Fim</div>
+              <div className="text-sm font-medium">Selfie — Fim</div>
               {data?.endUrl ? (
-                <img src={data.endUrl} alt="Foto de fim" className="w-full rounded-lg border object-contain" />
+                <img src={data.endUrl} alt="Selfie de fim" className="w-full rounded-lg border object-contain" />
               ) : (
-                <div className="rounded-lg border p-6 text-sm text-muted-foreground">Sem foto de fim</div>
+                <div className="rounded-lg border p-6 text-sm text-muted-foreground">Sem selfie de fim</div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Hodômetro — Início</div>
+              {data?.startOdoUrl ? (
+                <img src={data.startOdoUrl} alt="Foto do hodômetro de início" className="w-full rounded-lg border object-contain" />
+              ) : (
+                <div className="rounded-lg border p-6 text-sm text-muted-foreground">Sem foto do hodômetro de início</div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Hodômetro — Fim</div>
+              {data?.endOdoUrl ? (
+                <img src={data.endOdoUrl} alt="Foto do hodômetro de fim" className="w-full rounded-lg border object-contain" />
+              ) : (
+                <div className="rounded-lg border p-6 text-sm text-muted-foreground">Sem foto do hodômetro de fim</div>
               )}
             </div>
           </div>

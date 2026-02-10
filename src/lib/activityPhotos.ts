@@ -29,7 +29,7 @@ function assertValidImage(blob: Blob) {
 export async function uploadActivityPhoto(params: {
   userId: string;
   blob: Blob;
-  prefix: "start" | "end";
+  prefix: "start" | "end" | "start-odometer" | "end-odometer";
 }): Promise<string> {
   const { userId, blob, prefix } = params;
 
