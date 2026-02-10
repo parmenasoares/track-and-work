@@ -110,7 +110,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="mb-4 text-center">
-          <p className="text-xs font-semibold tracking-wide text-muted-foreground">RYROX RENTAL</p>
+          <p className="text-xs font-semibold tracking-wide text-muted-foreground">RYROX RENTAL CONTROL</p>
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
             {isLogin ? t("login") : t("signup")}
           </h1>
